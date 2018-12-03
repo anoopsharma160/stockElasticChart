@@ -80,6 +80,40 @@ catch (ParseException e){
         putData(json, indexName);
     }
 }
+
+    public void storeDataElasticSearchNSEBN(String key,Map map, String indexName ) throws ParseException, IOException {
+
+        map.put("Stock",key);
+            DecimalFormat decimalFormat = (DecimalFormat) DecimalFormat.getInstance();
+        double priceLTP ;
+        double currentOI ;
+        double changeOI;
+        double vol;
+            try {
+                priceLTP = decimalFormat.parse((String) map.get("LTP")).doubleValue();
+                currentOI = decimalFormat.parse((String) map.get("OI")).doubleValue();
+                 changeOI = decimalFormat.parse((String) map.get("Chng in OI")).doubleValue();
+                 vol = decimalFormat.parse((String) map.get("Volume")).doubleValue();
+            }
+            catch (ParseException e){
+                priceLTP=0.0;
+                currentOI=0.0;
+                changeOI=0.0;
+                vol=0.0;
+            }
+
+            map.put("LTP",priceLTP);
+            map.put("OI",currentOI/1000);
+            map.put("Chng in OI",changeOI/1000);
+            map.put("Volume",vol/1000);
+        map.put("timestamp",System.currentTimeMillis());
+            String json=new ObjectMapper().writeValueAsString(map);
+            putData(json, indexName);
+
+    }
+
+
+
     public void clearElastChartData(String indexName) throws IOException {
         RestHighLevelClient client = new RestHighLevelClient(RestClient.builder(
                 new HttpHost("localhost", 9200, "http"),
@@ -94,6 +128,6 @@ catch (ParseException e){
     }
 
     public static void main(String[] args) throws IOException {
-        new ElasticSearchUtil().clearElastChartData("indexoidata");
+        new ElasticSearchUtil().clearElastChartData("bnnseoidata");
     }
 }

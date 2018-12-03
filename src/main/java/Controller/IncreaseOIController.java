@@ -2,6 +2,7 @@ package Controller;
 
 
 import IndexDataGathering.DBControllerIndex;
+import IndexNSELive.NSEBNDController;
 import MoneyControlDataFetcher.DBController;
 import NSEData.JSONReader;
 import NSEData.NseChartController;
@@ -29,6 +30,10 @@ new JSONReader().execute(id);
     @RequestMapping(value = "/indexOption/{id}",method = RequestMethod.GET)
     void indexOptionData(@PathVariable("id")Integer id) throws InterruptedException, IOException, ParseException {
         new DBControllerIndex().execute(id);
+    }
+    @RequestMapping(value = "/nsebnoi",method = RequestMethod.GET)
+    void nsebnoidata() throws InterruptedException, ParseException, IOException {
+        new NSEBNDController().execute(0);
     }
 
     @RequestMapping(value = "",method = RequestMethod.GET)
