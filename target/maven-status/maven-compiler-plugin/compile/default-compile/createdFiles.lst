@@ -1,9 +1,9 @@
 IndexDataGathering/DBControllerIndex.class
 IndexNSELive/NSEBankNiftyFetcher.class
 IndexDataGathering/ChartControllerIndex.class
+Executor.class
 IndexNSELive/NSEBNDController.class
 NSEData/JSONReader.class
-MoneyControlDataFetcher/DBController.class
 NSEData/NseChartController.class
 IndexDataGathering/MoneyControllerIndexFetcher.class
 Controller/IncreaseOIController.class
@@ -12,3 +12,4 @@ MoneyControlDataFetcher/MoneyControllerScrapper.class
 MoneyControlDataFetcher/ChartController.class
 ElasticSearch/ElasticSearchUtil.class
 StockMongo/StockMongo/StockMongoApplication.class
+MoneyControlDataFetcher/ESInsertionIncPri.class

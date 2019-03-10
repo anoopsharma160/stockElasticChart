@@ -11,12 +11,19 @@ import java.util.List;
 import java.util.Map;
 
 public class MoneyControllerScrapper {
-    static List<String> headersList= new LinkedList<String>();
-    static List<List<String>> rowData= new LinkedList<List<String>>();
+    static List<String> headersList;
+    static List<List<String>> rowData;
+
+    public static void main(String[] args) throws IOException {
+        System.out.println(new MoneyControllerScrapper().getMappedData());
+    }
 
     public Map<String,Map<String, String>> getMappedData() throws IOException {
+        headersList= new LinkedList<>();
+        rowData= new LinkedList<>();
         Document doc;
-        doc = Jsoup.connect("https://www.moneycontrol.com/stocks/fno/marketstats/futures/oi_inc_p_inc/homebody.php?opttopic=allfut&optinst=allfut&sel_mth=1&sort_order=0").get();
+        doc = Jsoup.connect("https://www.moneycontrol.com/stocks/fno/marketstats/futures/oi_inc_p_inc/homebody.php?opttopic=stkfut&optinst=stkfut&sel_mth=1&sort_order=1").get();
+
 //        doc = Jsoup.connect("https://www.moneycontrol.com/stocks/fno/marketstats/futures/oi_inc_p_inc/homebody.php?opttopic=allfut&optinst=allfut&sel_mth=1&sort_order=1").get();
 //        doc = Jsoup.connect("https://www.moneycontrol.com/stocks/fno/marketstats/futures/oi_dec_p_dec/homebody.php?opttopic=allfut&optinst=allfut&sel_mth=1&sort_order=0").get();
 //        doc = Jsoup.connect("https://www.moneycontrol.com/stocks/fno/marketstats/futures/oi_dec_p_dec/homebody.php?opttopic=allfut&optinst=allfut&sel_mth=1&sort_order=0").get();
@@ -64,6 +71,7 @@ public class MoneyControllerScrapper {
         }
 //3 Convert Collection to final Map
         Map<String,Map<String, String>> finalMap= new LinkedHashMap<String, Map<String, String>>();
+        int stockCount=0;
         for (List list:rowData){
             int symbolCount=0;
 //            List list1= new LinkedList();
@@ -73,8 +81,10 @@ public class MoneyControllerScrapper {
                 internalmap.put(headersList.get(headerCount++), (String) list1);
 //                System.out.print(list1+"   ");
             }
+            if(stockCount++<=20)
             finalMap.put(internalmap.get("Symbol"),internalmap);
             System.out.println();
+
         }
 //4 Print the new Map
 //

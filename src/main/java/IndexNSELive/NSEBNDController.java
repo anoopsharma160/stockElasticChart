@@ -21,7 +21,7 @@ public class NSEBNDController {
     }
 
     public void execute(int sleepTime) throws IOException, InterruptedException, ParseException {
-Thread.sleep(sleepTime*1000);
+//Thread.sleep(sleepTime*1000);
 
             Map<String, Map<String, String>> map = new NSEBankNiftyFetcher().getMappedData();
             Double bnCurrentValue=new NSEBankNiftyFetcher().getBnCurrentValue();

@@ -1,6 +1,8 @@
 package ElasticSearch;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import org.apache.http.HttpHost;
 import org.bson.Document;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
@@ -19,10 +21,14 @@ import java.util.Map;
 
 public class ElasticSearchUtil {
 //        static int number=0;
+    static  int bnCount=0;
 
-    public boolean putData(String dataJson,String indexName) throws IOException {
+    public static boolean putData(String dataJson, String indexName) throws IOException {
         RestHighLevelClient client = new RestHighLevelClient(RestClient.builder(
-                new HttpHost("localhost", 9200, "http"),
+//                new HttpHost("10.157.251.29", 9200, "http"),
+//                new HttpHost("10.157.251.29", 9201, "http")
+
+        new HttpHost("localhost", 9200, "http"),
                 new HttpHost("localhost", 9201, "http")
         ));
 
@@ -81,10 +87,52 @@ catch (ParseException e){
     }
 }
 
+// store the es data for top 5 increase in oi and increase in price
+
+    public void storeDataElasticSearchTopstocks(Map map, String indexName ) throws ParseException, IOException {
+        try {
+            if ((!(map.get("Symbol").toString().contains("null")))) {
+                DecimalFormat decimalFormat = (DecimalFormat) DecimalFormat.getInstance();
+                double oiChgPerc = decimalFormat.parse((String) map.get("Increase %")).doubleValue();
+                double priceChg = decimalFormat.parse((String) map.get("Chg Rs")).doubleValue();
+                double volChgPerc;
+                try {
+                    volChgPerc = decimalFormat.parse((String) map.get("% Change")).doubleValue();
+                } catch (ParseException e) {
+                    volChgPerc = 0.0;
+                }
+                map.remove("Chg %");
+                map.remove("Chg Rs");
+                map.remove("% Change");
+
+                map.put("Price CHG", priceChg);
+            if(oiChgPerc>100){
+                oiChgPerc=50+oiChgPerc%100;
+            }
+            if (volChgPerc > 100) {
+                    volChgPerc = 100 + volChgPerc % 100;
+                }
+                if(priceChg>20){
+                    priceChg=20+priceChg%100;
+                }
+
+                map.put("OI CHG %", oiChgPerc);
+                map.put("VOL CHG %", volChgPerc);
+                map.put("timestamp", System.currentTimeMillis());
+
+                String json = new ObjectMapper().writeValueAsString(map);
+                putData(json, indexName);
+            }
+        }catch (NullPointerException e){
+            System.out.println("Exception occured!!!!!!!!");
+        }
+    }
+
+
     public void storeDataElasticSearchNSEBN(String key,Map map, String indexName ) throws ParseException, IOException {
 
         map.put("Stock",key);
-            DecimalFormat decimalFormat = (DecimalFormat) DecimalFormat.getInstance();
+            DecimalFormat decimalFormat = new DecimalFormat();
         double priceLTP ;
         double currentOI ;
         double changeOI;
@@ -103,9 +151,30 @@ catch (ParseException e){
             }
 
             map.put("LTP",priceLTP);
-            map.put("OI",currentOI/1000);
-            map.put("Chng in OI",changeOI/1000);
+            map.put("OI",currentOI/100);
+
+//            if(bnCount++<15){
+//                map.put("Chng in OI", changeOI);
+//            }
+//            else
+            map.put("Chng in OI", changeOI/100);
+
             map.put("Volume",vol/1000);
+// Adding the Average of LTP+CHG in OI +Volume
+//        map.put("AVG of 3",priceLTP+vol/100);
+// adding the Price +vol/chnginOI
+
+        try {
+            double avgValue = (((priceLTP * 1000) + (vol)) / (changeOI / 100));
+            if (avgValue > 0 && avgValue < 1000)
+                map.put("AVG of 3", avgValue);
+            else
+                map.put("AVG of 3", avgValue / 1000);
+        }
+        catch (Exception e){
+            System.out.println("Exception Occured: "+e);
+            map.put("AVG of 3", -1.00);
+        }
         map.put("timestamp",System.currentTimeMillis());
             String json=new ObjectMapper().writeValueAsString(map);
             putData(json, indexName);
@@ -128,6 +197,20 @@ catch (ParseException e){
     }
 
     public static void main(String[] args) throws IOException {
-        new ElasticSearchUtil().clearElastChartData("bnnseoidata");
+//        new ElasticSearchUtil().clearElastChartData("incpriincoitop");
+//        new ElasticSearchUtil().clearElastChartData("bnnseoidata");
+         new ElasticSearchUtil().clearElastChartData("bn_oi_history");
+
+        // Adding time stamp
+//        Response responseBnNse= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}}")
+//        .put("http://localhost:9200/incpriincoitop");
+//        System.out.println(responseBnNse.prettyPrint());
+//
+//        Response responseIncTop= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}}")
+//        .put("http://localhost:9200/bnnseoidata");
+//        System.out.println(responseIncTop.prettyPrint());
+
+        Response responseBNOIHistory= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"Date\":{\"type\":\"date\"}}}}}").put("http://localhost:9200/bn_oi_history");
+        System.out.println(responseBNOIHistory.prettyPrint());
     }
 }

@@ -3,7 +3,7 @@ package Controller;
 
 import IndexDataGathering.DBControllerIndex;
 import IndexNSELive.NSEBNDController;
-import MoneyControlDataFetcher.DBController;
+import MoneyControlDataFetcher.ESInsertionIncPri;
 import NSEData.JSONReader;
 import NSEData.NseChartController;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,7 +21,7 @@ public class IncreaseOIController {
     @RequestMapping(value = "/IncPriIncOi/{id}",method = RequestMethod.GET)
     public void IncPriceInOI(@PathVariable("id") Integer id) throws InterruptedException, ParseException, IOException {
         System.out.println("Inside the method");
-new DBController().execute(id);
+new ESInsertionIncPri().execute(id);
     }
     @RequestMapping(value = "/nse/{id}",method = RequestMethod.GET)
     void nseDataGathering(@PathVariable("id")Integer id) throws InterruptedException, IOException {
