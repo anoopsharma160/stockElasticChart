@@ -103,7 +103,7 @@ public static void writeES(String fileName) throws IOException, ParseException {
                 System.out.println("Printing the final Map: "+dataMap);
                 if(currentOI!=0.0){
                     double currentStrikePrice=Double.valueOf(rowData[4]);
-                    if((currentStrikePrice-NSEHistoryScrapper.BNCurrentValue)>-600 &&(currentStrikePrice-NSEHistoryScrapper.BNCurrentValue)<600){
+                    if((currentStrikePrice-NSEHistoryScrapper.BNCurrentValue)>-900 &&(currentStrikePrice-NSEHistoryScrapper.BNCurrentValue)<900){
                         ElasticSearchUtil.putData(json, "bn_oi_history");
                     }
                 }

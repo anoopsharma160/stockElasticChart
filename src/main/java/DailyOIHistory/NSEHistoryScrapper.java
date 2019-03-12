@@ -1,5 +1,8 @@
 package DailyOIHistory;
 
+import ElasticSearch.ElasticSearchUtil;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
@@ -13,6 +16,23 @@ import java.text.ParseException;
 public class NSEHistoryScrapper {
     public static double BNCurrentValue;
     public static void main(String[] args) throws InterruptedException, IOException, ParseException {
+// First Clear the old data
+        new ElasticSearchUtil().clearElastChartData("bn_oi_history");
+
+        // Adding time stamp
+//        Response responseBnNse= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}}")
+//        .put("http://localhost:9200/incpriincoitop");
+//        System.out.println(responseBnNse.prettyPrint());
+//
+//        Response responseIncTop= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}}")
+//        .put("http://localhost:9200/bnnseoidata");
+//        System.out.println(responseIncTop.prettyPrint());
+
+        Response responseBNOIHistory= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"Date\":{\"type\":\"date\"}}}}}").put("http://localhost:9200/bn_oi_history");
+        System.out.println(responseBNOIHistory.prettyPrint());
+
+
+
 String optionType[]={"ce","pe"};
         for (int i = 0; i <optionType.length ; i++) {
             boolean isSuccesfull = false;
