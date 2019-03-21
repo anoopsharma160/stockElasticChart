@@ -151,15 +151,15 @@ catch (ParseException e){
             }
 
             map.put("LTP",priceLTP);
-            map.put("OI",currentOI/100);
+            map.put("OI",currentOI);
 
 //            if(bnCount++<15){
 //                map.put("Chng in OI", changeOI);
 //            }
 //            else
-            map.put("Chng in OI", changeOI/100);
+            map.put("Chng in OI", changeOI);
 
-            map.put("Volume",vol/1000);
+            map.put("Volume",vol);
 // Adding the Average of LTP+CHG in OI +Volume
 //        map.put("AVG of 3",priceLTP+vol/100);
 // adding the Price +vol/chnginOI
@@ -198,7 +198,7 @@ catch (ParseException e){
 
     public static void main(String[] args) throws IOException {
 //        new ElasticSearchUtil().clearElastChartData("incpriincoitop");
-//        new ElasticSearchUtil().clearElastChartData("bnnseoidata");
+        new ElasticSearchUtil().clearElastChartData("bnnseoidata");
          new ElasticSearchUtil().clearElastChartData("bn_oi_history");
 
         // Adding time stamp
@@ -206,9 +206,9 @@ catch (ParseException e){
 //        .put("http://localhost:9200/incpriincoitop");
 //        System.out.println(responseBnNse.prettyPrint());
 //
-//        Response responseIncTop= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}}")
-//        .put("http://localhost:9200/bnnseoidata");
-//        System.out.println(responseIncTop.prettyPrint());
+        Response responseIncTop= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}}")
+        .put("http://localhost:9200/bnnseoidata");
+        System.out.println(responseIncTop.prettyPrint());
 
         Response responseBNOIHistory= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"Date\":{\"type\":\"date\"}}}}}").put("http://localhost:9200/bn_oi_history");
         System.out.println(responseBNOIHistory.prettyPrint());
