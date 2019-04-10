@@ -10,15 +10,15 @@ public class Utils {
 
         System.out.println(returnNextExpiry());
 
-        String dateString="01-Mar-2019";
-        Date date= new SimpleDateFormat("dd-MMM-yyyy").parse(dateString);
-
-        System.out.println(date);
-
     }
     public static String returnNextExpiry(){
         Calendar calendar=Calendar.getInstance();
+        if(String.valueOf(calendar.getTime()).contains("Fri") || String.valueOf(calendar.getTime()).contains("Sat")
+        ||String.valueOf(calendar.getTime()).contains("Sun")){
+            calendar.add(Calendar.DAY_OF_WEEK,7);
+        }
         calendar.set(Calendar.DAY_OF_WEEK,Calendar.THURSDAY);
+
 
 //        date.add(Calendar.DAY_OF_WEEK,7);
 

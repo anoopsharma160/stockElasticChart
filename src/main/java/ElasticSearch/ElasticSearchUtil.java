@@ -1,5 +1,6 @@
 package ElasticSearch;
 
+import IndexNSELive.NSEBankNiftyFetcher;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
@@ -16,12 +17,12 @@ import org.elasticsearch.common.xcontent.XContentType;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
 public class ElasticSearchUtil {
 //        static int number=0;
     static  int bnCount=0;
+    static List listPETemp= new ArrayList();
 
     public static boolean putData(String dataJson, String indexName) throws IOException {
         RestHighLevelClient client = new RestHighLevelClient(RestClient.builder(
@@ -140,6 +141,9 @@ catch (ParseException e){
             try {
                 priceLTP = decimalFormat.parse((String) map.get("LTP")).doubleValue();
                 currentOI = decimalFormat.parse((String) map.get("OI")).doubleValue();
+// Random Long values to change the oi for testing
+String randomValue= String.valueOf(new Random().nextLong()).substring(0,3);
+Double randomDoubleValue=Double.valueOf(randomValue);
                  changeOI = decimalFormat.parse((String) map.get("Chng in OI")).doubleValue();
                  vol = decimalFormat.parse((String) map.get("Volume")).doubleValue();
             }
@@ -165,22 +169,49 @@ catch (ParseException e){
 // adding the Price +vol/chnginOI
 
         try {
-            double avgValue = (((priceLTP * 1000) + (vol)) / (changeOI / 100));
-            if (avgValue > 0 && avgValue < 1000)
+            double avgValue = (((priceLTP) + (vol)) / (currentOI));
+//            if (avgValue > 0 && avgValue < 1000)
                 map.put("AVG of 3", avgValue);
-            else
-                map.put("AVG of 3", avgValue / 1000);
+//            else
+//                map.put("AVG of 3", avgValue / 1000);
         }
         catch (Exception e){
             System.out.println("Exception Occured: "+e);
             map.put("AVG of 3", -1.00);
         }
+        map.put("Price and Vol",priceLTP+vol);
         map.put("timestamp",System.currentTimeMillis());
             String json=new ObjectMapper().writeValueAsString(map);
+
             putData(json, indexName);
+// Adding data to another index OTM data
+            String currentStockName= (String) map.get("Stock");
+        Double currentStockStrikePrice= Double.parseDouble(String.valueOf(map.get("Strike Price")));
+        Double bnCurrentValue= new NSEBankNiftyFetcher().getBnCurrentValue();
+        if(currentStockName.contains("CE") && (currentStockStrikePrice-bnCurrentValue>0) &&(currentStockStrikePrice-bnCurrentValue<100)) {
+            putData(json, "bnotm");
+            putDataRatioIndex(listPETemp,changeOI,"bnotmratio");
+        }
+        else if (currentStockName.contains("PE") && (currentStockStrikePrice-bnCurrentValue>-100) &&(currentStockStrikePrice-bnCurrentValue<0)){
+            putData(json, "bnotm");
+            listPETemp.add(changeOI);
+
+
+        }
 
     }
 
+    static void putDataRatioIndex(List list,double chngOICE,String indexName) throws IOException {
+        Double chngOIPE= (Double) list.get(0);
+        if(list.size()==1){
+            list.clear();
+        }
+        Map ratioMapData= new HashMap();
+        ratioMapData.put("OTM Ratio",chngOIPE/chngOICE);
+        ratioMapData.put("timestamp",System.currentTimeMillis());
+        String json=new ObjectMapper().writeValueAsString(ratioMapData);
+        putData(json,indexName);
+    }
 
 
     public void clearElastChartData(String indexName) throws IOException {
@@ -199,7 +230,9 @@ catch (ParseException e){
     public static void main(String[] args) throws IOException {
 //        new ElasticSearchUtil().clearElastChartData("incpriincoitop");
         new ElasticSearchUtil().clearElastChartData("bnnseoidata");
-         new ElasticSearchUtil().clearElastChartData("bn_oi_history");
+        new ElasticSearchUtil().clearElastChartData("bnotm");
+        new ElasticSearchUtil().clearElastChartData("bnotmratio");
+//         new ElasticSearchUtil().clearElastChartData("bn_oi_history");
 
         // Adding time stamp
 //        Response responseBnNse= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}}")
@@ -210,7 +243,15 @@ catch (ParseException e){
         .put("http://localhost:9200/bnnseoidata");
         System.out.println(responseIncTop.prettyPrint());
 
-        Response responseBNOIHistory= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"Date\":{\"type\":\"date\"}}}}}").put("http://localhost:9200/bn_oi_history");
-        System.out.println(responseBNOIHistory.prettyPrint());
+        Response responseOTM= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}}")
+                .put("http://localhost:9200/bnotm");
+        System.out.println(responseOTM.prettyPrint());
+
+        Response responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}}")
+                .put("http://localhost:9200/bnotmratio");
+        System.out.println(responseOTMRatio.prettyPrint());
+
+//        Response responseBNOIHistory= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"Date\":{\"type\":\"date\"}}}}}").put("http://localhost:9200/bn_oi_history");
+//        System.out.println(responseBNOIHistory.prettyPrint());
     }
 }

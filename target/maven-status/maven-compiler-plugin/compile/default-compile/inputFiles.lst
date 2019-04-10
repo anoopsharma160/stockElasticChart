@@ -6,10 +6,13 @@
 /Users/anoop/Downloads/StockMongo/src/main/java/NSEData/NseChartController.java
 /Users/anoop/Downloads/StockMongo/src/main/java/IndexDataGathering/DBControllerIndex.java
 /Users/anoop/Downloads/StockMongo/src/main/java/IndexNSELive/ChartControllerIndex.java
+/Users/anoop/Downloads/StockMongo/src/main/java/DailyOIHistory/NSEHistoryScrapper.java
 /Users/anoop/Downloads/StockMongo/src/main/java/IndexDataGathering/ChartControllerIndex.java
 /Users/anoop/Downloads/StockMongo/src/main/java/Controller/IncreaseOIController.java
 /Users/anoop/Downloads/StockMongo/src/main/java/MoneyControlDataFetcher/ESInsertionIncPri.java
+/Users/anoop/Downloads/StockMongo/src/main/java/DailyOIHistory/FileUtils.java
 /Users/anoop/Downloads/StockMongo/src/main/java/IndexNSELive/NSEBNDController.java
 /Users/anoop/Downloads/StockMongo/src/main/java/NSEData/JSONReader.java
 /Users/anoop/Downloads/StockMongo/src/main/java/MoneyControlDataFetcher/ChartController.java
 /Users/anoop/Downloads/StockMongo/src/main/java/IndexDataGathering/MoneyControllerIndexFetcher.java
+/Users/anoop/Downloads/StockMongo/src/main/java/DailyOIHistory/Utils.java

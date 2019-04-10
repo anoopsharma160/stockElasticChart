@@ -155,10 +155,10 @@ catch (NullPointerException e){
     System.out.println("Exception Occured");
 
 }
-            if(strikePVCall-bnCurrentValue<=500 &&strikePVCall-bnCurrentValue>=-200) {
+            if(strikePVCall-bnCurrentValue<=600 &&strikePVCall-bnCurrentValue>=-400) {
                 finalMap.put(callMap.get("Strike Price") + " CE", callMap);
             }
-            if(strikePVPut-bnCurrentValue>=-400 && strikePVPut-bnCurrentValue<=200) {
+            if(strikePVPut-bnCurrentValue>=-600 && strikePVPut-bnCurrentValue<=400) {
                 finalMap.put(putMap.get("Strike Price") + " PE", putMap);
             }
 

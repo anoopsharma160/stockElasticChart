@@ -17,7 +17,7 @@ public class NSEHistoryScrapper {
     public static double BNCurrentValue;
     public static void main(String[] args) throws InterruptedException, IOException, ParseException {
 // First Clear the old data
-        new ElasticSearchUtil().clearElastChartData("bn_oi_history");
+//        new ElasticSearchUtil().clearElastChartData("bn_oi_history");
 
         // Adding time stamp
 //        Response responseBnNse= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}}")
@@ -67,7 +67,7 @@ boolean isSuccessful = false;
             selectDropDown(driver,"optionType","PE");
 
         driver.findElement(By.id("rdPeriod")).click();
-        selectDropDown(driver,"dateRange","7 Days");
+        selectDropDown(driver,"dateRange","15 Days");
         driver.findElement(By.xpath("//*[@id=\"getButton\"]")).click();
         driver.findElement(By.xpath("//*[@id=\"getButton\"]")).click();
         Thread.sleep(20000);

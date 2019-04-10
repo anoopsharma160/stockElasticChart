@@ -33,9 +33,10 @@ public class NSEBNDController {
 //                    decimalFormat.parse((String) map.get("LTP")).doubleValue();
 
                     Double strikePriceValue= new DecimalFormat().parse(internalMap.get("Strike Price")).doubleValue();
-                    Double bnCurrentVal=new NSEBankNiftyFetcher().getBnCurrentValue();
-//                    if((strikePriceValue-bnCurrentVal>=-600)&&(strikePriceValue-bnCurrentVal<=500))
+//                    Double bnCurrentVal=new NSEBankNiftyFetcher().getBnCurrentValue();
+//                    if((strikePriceValue-bnCurrentValue>=-1900)&&(strikePriceValue-bnCurrentValue<=1900))
                     new ElasticSearchUtil().storeDataElasticSearchNSEBN(key,internalMap, "bnnseoidata");
+
                 }
 
 

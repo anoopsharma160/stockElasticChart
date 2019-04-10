@@ -1,9 +1,12 @@
+DailyOIHistory/NSEHistoryScrapper.class
+DailyOIHistory/FileUtils.class
 IndexDataGathering/DBControllerIndex.class
 IndexNSELive/NSEBankNiftyFetcher.class
 IndexDataGathering/ChartControllerIndex.class
 Executor.class
 IndexNSELive/NSEBNDController.class
 NSEData/JSONReader.class
+DailyOIHistory/Utils.class
 NSEData/NseChartController.class
 IndexDataGathering/MoneyControllerIndexFetcher.class
 Controller/IncreaseOIController.class
