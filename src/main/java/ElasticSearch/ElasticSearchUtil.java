@@ -210,7 +210,17 @@ Double randomDoubleValue=Double.valueOf(randomValue);
         ratioMapData.put("OTM Ratio",chngOIPE/chngOICE);
         ratioMapData.put("timestamp",System.currentTimeMillis());
         String json=new ObjectMapper().writeValueAsString(ratioMapData);
-        putData(json,indexName);
+        if (!json.contains("NaN")) {
+            try {
+                putData(json, indexName);
+            } catch (Exception e) {
+                System.out.println("OTM Ratio Exception Occured : setting 0 value");
+                ratioMapData.put("OTM Ratio", 0);
+                ratioMapData.put("timestamp", System.currentTimeMillis());
+                json = new ObjectMapper().writeValueAsString(ratioMapData);
+                putData(json, indexName);
+            }
+        }
     }
 
 
