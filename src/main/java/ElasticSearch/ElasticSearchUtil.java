@@ -213,12 +213,14 @@ Double randomDoubleValue=Double.valueOf(randomValue);
         if (!json.contains("NaN")) {
             try {
                 putData(json, indexName);
+                putData(json, "bnotmratioall");
             } catch (Exception e) {
                 System.out.println("OTM Ratio Exception Occured : setting 0 value");
                 ratioMapData.put("OTM Ratio", 0);
                 ratioMapData.put("timestamp", System.currentTimeMillis());
                 json = new ObjectMapper().writeValueAsString(ratioMapData);
                 putData(json, indexName);
+                putData(json, "bnotmratioall");
             }
         }
     }
@@ -242,6 +244,7 @@ Double randomDoubleValue=Double.valueOf(randomValue);
         new ElasticSearchUtil().clearElastChartData("bnnseoidata");
         new ElasticSearchUtil().clearElastChartData("bnotm");
         new ElasticSearchUtil().clearElastChartData("bnotmratio");
+        new ElasticSearchUtil().clearElastChartData("bnotmratioall");
 //         new ElasticSearchUtil().clearElastChartData("bn_oi_history");
 
         // Adding time stamp
@@ -249,16 +252,24 @@ Double randomDoubleValue=Double.valueOf(randomValue);
 //        .put("http://localhost:9200/incpriincoitop");
 //        System.out.println(responseBnNse.prettyPrint());
 //
-        Response responseIncTop= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}}")
+
+
+
+        //888888*************
+        Response responseIncTop= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
         .put("http://localhost:9200/bnnseoidata");
         System.out.println(responseIncTop.prettyPrint());
 
-        Response responseOTM= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}}")
+        Response responseOTM= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
                 .put("http://localhost:9200/bnotm");
         System.out.println(responseOTM.prettyPrint());
 
-        Response responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}}")
+        Response responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
                 .put("http://localhost:9200/bnotmratio");
+        System.out.println(responseOTMRatio.prettyPrint());
+
+        responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+                .put("http://localhost:9200/bnotmratioall");
         System.out.println(responseOTMRatio.prettyPrint());
 
 //        Response responseBNOIHistory= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"Date\":{\"type\":\"date\"}}}}}").put("http://localhost:9200/bn_oi_history");

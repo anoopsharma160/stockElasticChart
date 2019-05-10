@@ -1,5 +1,6 @@
 package IndexNSELive;
 
+import ElasticSearch.ElasticAlert;
 import ElasticSearch.ElasticSearchUtil;
 import IndexDataGathering.DBControllerIndex;
 import com.mongodb.BasicDBObject;
@@ -36,6 +37,9 @@ public class NSEBNDController {
 //                    Double bnCurrentVal=new NSEBankNiftyFetcher().getBnCurrentValue();
 //                    if((strikePriceValue-bnCurrentValue>=-1900)&&(strikePriceValue-bnCurrentValue<=1900))
                     new ElasticSearchUtil().storeDataElasticSearchNSEBN(key,internalMap, "bnnseoidata");
+
+
+
 
                 }
 

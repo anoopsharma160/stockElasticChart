@@ -17,7 +17,7 @@ public class NSEHistoryScrapper {
     public static double BNCurrentValue;
     public static void main(String[] args) throws InterruptedException, IOException, ParseException {
 // First Clear the old data
-//        new ElasticSearchUtil().clearElastChartData("bn_oi_history");
+        new ElasticSearchUtil().clearElastChartData("bn_oi_history");
 
         // Adding time stamp
 //        Response responseBnNse= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}}")
@@ -28,7 +28,7 @@ public class NSEHistoryScrapper {
 //        .put("http://localhost:9200/bnnseoidata");
 //        System.out.println(responseIncTop.prettyPrint());
 
-        Response responseBNOIHistory= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"Date\":{\"type\":\"date\"}}}}}").put("http://localhost:9200/bn_oi_history");
+        Response responseBNOIHistory= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"Date\":{\"type\":\"date\"}}}}").put("http://localhost:9200/bn_oi_history");
         System.out.println(responseBNOIHistory.prettyPrint());
 
 
