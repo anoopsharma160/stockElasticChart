@@ -11,9 +11,9 @@ import java.util.Map;
 
 public class ElasticAlert {
     public static void main(String[] args) {
-        ElasticAlert.triggerAlert(String.valueOf(System.currentTimeMillis()),String.valueOf(System.currentTimeMillis()-100000));
+        ElasticAlert.triggerAlert(String.valueOf(System.currentTimeMillis()),String.valueOf(System.currentTimeMillis()-100000),"5 Min Alert Type",10000,-10000);
     }
-    public static void triggerAlert(String currentTime,String pastTime){
+    public static void triggerAlert(String currentTime,String pastTime,String alertType,float positiveDiffValue,float negativeDiffValue){
 
         Response response= RestAssured.given().contentType(ContentType.JSON).
                 body("{\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"timestamp\",\"interval\":\"1s\",\"time_zone\":\"Asia/Kolkata\",\"min_doc_count\":1},\"aggs\":{\"3\":{\"terms\":{\"field\":\"Stock.keyword\",\"size\":25,\"order\":{\"_key\":\"desc\"}},\"aggs\":{\"1\":{\"avg\":{\"field\":\"Chng in OI\"}}}}}}},\"size\":0,\"_source\":{\"excludes\":[]},\"stored_fields\":[\"*\"],\"script_fields\":{},\"docvalue_fields\":[{\"field\":\"timestamp\",\"format\":\"date_time\"}],\"query\":{\"bool\":{\"must\":" +
@@ -53,13 +53,13 @@ public class ElasticAlert {
 // Final Alert Map
         System.out.println("Final Alert map");
         System.out.println(alertmap);
-        sendAlert(alertmap);
+        sendAlert(alertmap,alertType,positiveDiffValue,negativeDiffValue);
     }
 
-    public static void sendAlert(Map<Object,List<Float>> map){
+    public static void sendAlert(Map<Object,List<Float>> map,String alertType,float positiveDiffValue, float negativeDiffValue){
 
-        String positiveDiff="Positive OI CHG \n\n";
-        String negativeDiff="Negative OI CHG\n\n";
+        String positiveDiff=alertType+"\nPositive OI CHG \n\n";
+        String negativeDiff=alertType+"\nNegative OI CHG\n\n";
         boolean isPositiveAlert=false;
         boolean isNegativeAlert=false;
         for (Object key :map.keySet()){
@@ -72,25 +72,27 @@ public class ElasticAlert {
            System.out.println("Index level exception occured, skipped that key: "+key);
        }
 
-            if(diff>10000){
+            if(diff>positiveDiffValue){
                 positiveDiff+=key+" Diff Value: "+diff+"\n";
                 isPositiveAlert=true;
             }
-            if(diff<-5000){
+            if(diff<negativeDiffValue){
                 negativeDiff+=key+" Diff Value: "+diff+"\n";
                 isNegativeAlert=true;
             }
         }
         // Sending alert to telegram
         Response response=null;
-        if(isPositiveAlert)
-         response= RestAssured.given().queryParam("chat_id","654771852").queryParam("text",positiveDiff)
-                .get("https://api.telegram.org/bot826838727:AAEhTJT4xQsTRxuF5wxtgNELjSJgjwkvYro/sendMessage");
-        System.out.println(response.prettyPrint());
-
-        if(isNegativeAlert)
-            response= RestAssured.given().queryParam("chat_id","654771852").queryParam("text",negativeDiff)
+        if(isPositiveAlert) {
+            response = RestAssured.given().queryParam("chat_id", "654771852").queryParam("text", positiveDiff)
                     .get("https://api.telegram.org/bot826838727:AAEhTJT4xQsTRxuF5wxtgNELjSJgjwkvYro/sendMessage");
-        System.out.println(response.prettyPrint());
+            System.out.println(response);
+            System.out.println(response.prettyPrint());
+        }
+        if(isNegativeAlert) {
+            response = RestAssured.given().queryParam("chat_id", "654771852").queryParam("text", negativeDiff)
+                    .get("https://api.telegram.org/bot826838727:AAEhTJT4xQsTRxuF5wxtgNELjSJgjwkvYro/sendMessage");
+            System.out.println(response.prettyPrint());
+        }
     }
 }

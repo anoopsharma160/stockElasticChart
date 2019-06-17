@@ -16,7 +16,7 @@ import java.util.Map;
 public class ESInsertionIncPri {
 
     public void execute(int sleepTime) throws IOException, InterruptedException, ParseException {
-        Thread.sleep(sleepTime * 1000);
+//        Thread.sleep(sleepTime * 1000);
         Map<String, Map<String, String>> map=new MoneyControllerScrapper().getMappedData();
 
         for (String key : map.keySet()) {

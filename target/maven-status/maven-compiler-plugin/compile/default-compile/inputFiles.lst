@@ -2,7 +2,9 @@
 /Users/anoop/Downloads/StockMongo/src/main/java/StockMongo/StockMongo/StockMongoApplication.java
 /Users/anoop/Downloads/StockMongo/src/main/java/MoneyControlDataFetcher/MoneyControllerScrapper.java
 /Users/anoop/Downloads/StockMongo/src/main/java/ElasticSearch/ElasticSearchUtil.java
+/Users/anoop/Downloads/StockMongo/src/main/java/ElasticSearch/ElasticAlert.java
 /Users/anoop/Downloads/StockMongo/src/main/java/Executor.java
+/Users/anoop/Downloads/StockMongo/src/main/java/ElasticSearch/TelegramTest.java
 /Users/anoop/Downloads/StockMongo/src/main/java/NSEData/NseChartController.java
 /Users/anoop/Downloads/StockMongo/src/main/java/IndexDataGathering/DBControllerIndex.java
 /Users/anoop/Downloads/StockMongo/src/main/java/IndexNSELive/ChartControllerIndex.java

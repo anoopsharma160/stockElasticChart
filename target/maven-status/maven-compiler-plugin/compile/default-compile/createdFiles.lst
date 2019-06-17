@@ -1,7 +1,9 @@
 DailyOIHistory/NSEHistoryScrapper.class
 DailyOIHistory/FileUtils.class
+ElasticSearch/TelegramTest.class
 IndexDataGathering/DBControllerIndex.class
 IndexNSELive/NSEBankNiftyFetcher.class
+ElasticSearch/ElasticAlert.class
 IndexDataGathering/ChartControllerIndex.class
 Executor.class
 IndexNSELive/NSEBNDController.class

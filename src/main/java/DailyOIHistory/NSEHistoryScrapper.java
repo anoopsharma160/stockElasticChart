@@ -8,6 +8,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.Select;
+import util.FileUtil;
 
 import javax.rmi.CORBA.Util;
 import java.io.IOException;
@@ -37,7 +38,10 @@ String optionType[]={"ce","pe"};
         for (int i = 0; i <optionType.length ; i++) {
             boolean isSuccesfull = false;
             while (true) {
-                try{isSuccesfull = execute(optionType[i]);}
+                try{
+//                    isSuccesfull = execute("Stock Options","AXISBANK",optionType[i]);
+                    isSuccesfull = execute("Index Options","BANK NIFTY",optionType[i]);
+                }
                 catch (Exception e){
                     System.out.println("Overall Exceptions Occured: ");
                     e.printStackTrace();
@@ -47,7 +51,7 @@ String optionType[]={"ce","pe"};
             }
         }
     }
-    static boolean execute(String type) throws InterruptedException, IOException, ParseException {
+    static boolean execute(String stockType,String symbolName,String type) throws InterruptedException, IOException, ParseException {
 WebDriver driver = null;
 boolean isSuccessful = false;
         try{
@@ -57,10 +61,10 @@ boolean isSuccessful = false;
             System.out.println("Current Bank Nifty Value : "+currentBNValue);
             BNCurrentValue=Double.valueOf(currentBNValue.substring(currentBNValue.indexOf(" ")));
         driver.get("https://www.nseindia.com/products/content/derivatives/equities/historical_fo.htm");
-        selectDropDown(driver,"instrumentType"," Index Options ");
-        selectDropDown(driver,"symbol","BANK NIFTY");
+        selectDropDown(driver,"instrumentType"," "+stockType+" ");
+        selectDropDown(driver,"symbol",symbolName);
         selectDropDown(driver,"year","2019");
-        selectDropDown(driver,"expiryDate", Utils.returnNextExpiry());
+        selectDropDown(driver,"expiryDate", Utils.returnNextExpiry(stockType));
         if(type.contains("ce"))
         selectDropDown(driver,"optionType","CE");
         else if(type.contains("pe"))
@@ -74,7 +78,7 @@ boolean isSuccessful = false;
         driver.manage().window().maximize();
         driver.findElement(By.xpath("//*[@id=\"historicalData\"]/div[1]/span[2]/a")).click();
         Thread.sleep(12000);
-            isSuccessful=FileUtils.processFile();
+            isSuccessful= FileUtil.processFile(symbolName);
         }
 catch (Exception e) {
     System.out.println("Below Exception Occured: ");

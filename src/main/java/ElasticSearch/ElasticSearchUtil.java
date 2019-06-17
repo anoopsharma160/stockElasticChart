@@ -13,6 +13,7 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
+import util.LengthUtil;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -97,32 +98,36 @@ catch (ParseException e){
                 double oiChgPerc = decimalFormat.parse((String) map.get("Increase %")).doubleValue();
                 double priceChg = decimalFormat.parse((String) map.get("Chg Rs")).doubleValue();
                 double volChgPerc;
-                try {
-                    volChgPerc = decimalFormat.parse((String) map.get("% Change")).doubleValue();
-                } catch (ParseException e) {
-                    volChgPerc = 0.0;
-                }
-                map.remove("Chg %");
-                map.remove("Chg Rs");
-                map.remove("% Change");
+                double ltp = decimalFormat.parse((String) map.get("Last Price")).doubleValue();
 
-                map.put("Price CHG", priceChg);
-            if(oiChgPerc>100){
-                oiChgPerc=50+oiChgPerc%100;
-            }
-            if (volChgPerc > 100) {
-                    volChgPerc = 100 + volChgPerc % 100;
-                }
-                if(priceChg>20){
-                    priceChg=20+priceChg%100;
-                }
+                if (ltp < 500) {
+                    try {
+                        volChgPerc = decimalFormat.parse((String) map.get("% Change")).doubleValue();
+                    } catch (ParseException e) {
+                        volChgPerc = 0.0;
+                    }
+                    map.remove("Chg %");
+                    map.remove("Chg Rs");
+                    map.remove("% Change");
 
-                map.put("OI CHG %", oiChgPerc);
-                map.put("VOL CHG %", volChgPerc);
-                map.put("timestamp", System.currentTimeMillis());
 
-                String json = new ObjectMapper().writeValueAsString(map);
-                putData(json, indexName);
+                    if (oiChgPerc > 100) {
+                        oiChgPerc = 50 + oiChgPerc % 100;
+                    }
+                    if (volChgPerc > 100) {
+                        volChgPerc = 100 + volChgPerc % 100;
+                    }
+                    if (priceChg > 20) {
+                        priceChg = 20 + priceChg % 100;
+                    }
+                    map.put("Price CHG", priceChg);
+                    map.put("OI CHG %", oiChgPerc);
+                    map.put("VOL CHG %", volChgPerc);
+                    map.put("timestamp", System.currentTimeMillis());
+
+                    String json = new ObjectMapper().writeValueAsString(map);
+                    putData(json, indexName);
+                }
             }
         }catch (NullPointerException e){
             System.out.println("Exception occured!!!!!!!!");
@@ -169,15 +174,23 @@ Double randomDoubleValue=Double.valueOf(randomValue);
 // adding the Price +vol/chnginOI
 
         try {
-            double avgValue = (((priceLTP) + (vol)) / (currentOI));
-//            if (avgValue > 0 && avgValue < 1000)
-                map.put("AVG of 3", avgValue);
-//            else
-//                map.put("AVG of 3", avgValue / 1000);
+//Apply the CHG OI length logic to calculate the AVG 3 Value
+            int lengthChgOI = String.valueOf(changeOI).length()-2;
+            int lengthPrice = String.valueOf(priceLTP).length()-1;
+            int diffValue = lengthChgOI - lengthPrice;
+            if (diffValue > 0) {
+                Double avgValue = (((priceLTP)* LengthUtil.get10Digits(diffValue) / (changeOI)));
+            if (!(avgValue > 1000)){
+                map.put("AVG of 3", avgValue);}
+            else {
+                avgValue=1000+avgValue%1000;
+                map.put("AVG of 3", avgValue / 1000);
+            }
+            }
         }
         catch (Exception e){
             System.out.println("Exception Occured: "+e);
-            map.put("AVG of 3", -1.00);
+            map.put("AVG of 3", -1.00d);
         }
         map.put("Price and Vol",priceLTP+vol);
         map.put("timestamp",System.currentTimeMillis());
@@ -245,6 +258,7 @@ Double randomDoubleValue=Double.valueOf(randomValue);
         new ElasticSearchUtil().clearElastChartData("bnotm");
         new ElasticSearchUtil().clearElastChartData("bnotmratio");
         new ElasticSearchUtil().clearElastChartData("bnotmratioall");
+        new ElasticSearchUtil().clearElastChartData("incpriincoitop5");
 //         new ElasticSearchUtil().clearElastChartData("bn_oi_history");
 
         // Adding time stamp
@@ -274,5 +288,8 @@ Double randomDoubleValue=Double.valueOf(randomValue);
 
 //        Response responseBNOIHistory= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"Date\":{\"type\":\"date\"}}}}}").put("http://localhost:9200/bn_oi_history");
 //        System.out.println(responseBNOIHistory.prettyPrint());
+        Response incPriIncOiIndex= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+                .put("http://localhost:9200/incpriincoitop5");
+        System.out.println(incPriIncOiIndex.prettyPrint());
     }
 }
