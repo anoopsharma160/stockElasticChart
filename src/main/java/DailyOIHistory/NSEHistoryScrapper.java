@@ -40,6 +40,7 @@ String optionType[]={"ce","pe"};
             while (true) {
                 try{
 //                    isSuccesfull = execute("Stock Options","AXISBANK",optionType[i]);
+//                    isSuccesfull = execute("Index Options","NIFTY 50",optionType[i]);
                     isSuccesfull = execute("Index Options","BANK NIFTY",optionType[i]);
                 }
                 catch (Exception e){
