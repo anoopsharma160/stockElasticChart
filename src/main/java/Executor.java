@@ -11,7 +11,11 @@ public class Executor {
            try {
                System.out.println("Thread waiting for 2 minutes");
                Thread.sleep(70000);
-               new NSEBNDController().execute(0);
+               NSEBNDController object=new NSEBNDController();
+               // Call for BN
+               object.execute(0);
+               // Call for Nifty
+               object.executeNifty(0);
                System.out.println("Count : " + i);
            }
            catch (Exception e){
@@ -32,11 +36,11 @@ public class Executor {
                 e.printStackTrace();
             }
 // Executing Inc OI Inc Pri Method
-            try{
-            new ESInsertionIncPri().execute(0);}
-            catch (Exception e){
-                System.out.println("Inc OI Inc Pri : Exception Occurred : Skipping this iteration");
-            }
+//            try{
+////            new ESInsertionIncPri().execute(0);}
+//            catch (Exception e){
+//                System.out.println("Inc OI Inc Pri : Exception Occurred : Skipping this iteration");
+//            }
 
         }
     }

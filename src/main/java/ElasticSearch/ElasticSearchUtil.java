@@ -1,5 +1,6 @@
 package ElasticSearch;
 
+import IndexNSELive.MCBNODFetcher;
 import IndexNSELive.NSEBankNiftyFetcher;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
@@ -135,7 +136,7 @@ catch (ParseException e){
     }
 
 
-    public void storeDataElasticSearchNSEBN(String key,Map map, String indexName ) throws ParseException, IOException {
+    public void storeDataElasticSearchNSEBN(String key,Map map, String indexName,String otmIndexName,String otmRationINdexName ) throws ParseException, IOException {
 
         map.put("Stock",key);
             DecimalFormat decimalFormat = new DecimalFormat();
@@ -200,17 +201,27 @@ Double randomDoubleValue=Double.valueOf(randomValue);
 // Adding data to another index OTM data
             String currentStockName= (String) map.get("Stock");
         Double currentStockStrikePrice= Double.parseDouble(String.valueOf(map.get("Strike Price")));
+// note To change the value
         Double bnCurrentValue= new NSEBankNiftyFetcher().getBnCurrentValue();
-        if(currentStockName.contains("CE") && (currentStockStrikePrice-bnCurrentValue>0) &&(currentStockStrikePrice-bnCurrentValue<100)) {
-            putData(json, "bnotm");
-            putDataRatioIndex(listPETemp,changeOI,"bnotmratio");
-        }
-        else if (currentStockName.contains("PE") && (currentStockStrikePrice-bnCurrentValue>-100) &&(currentStockStrikePrice-bnCurrentValue<0)){
-            putData(json, "bnotm");
-            listPETemp.add(changeOI);
+//        Double bnCurrentValue= new MCBNODFetcher().getBnCurrentValue();
+if(indexName.contains("bn")) {
 
-
-        }
+    if (currentStockName.contains("CE") && (currentStockStrikePrice - bnCurrentValue > 0) && (currentStockStrikePrice - bnCurrentValue < 100)) {
+        putData(json, otmIndexName);
+        putDataRatioIndex(listPETemp, changeOI, otmRationINdexName);
+    } else if (currentStockName.contains("PE") && (currentStockStrikePrice - bnCurrentValue > -100) && (currentStockStrikePrice - bnCurrentValue < 0)) {
+        putData(json, otmIndexName);
+        listPETemp.add(changeOI);
+    }
+}else{
+    if (currentStockName.contains("CE") && (currentStockStrikePrice - bnCurrentValue > 0) && (currentStockStrikePrice - bnCurrentValue < 50)) {
+        putData(json, otmIndexName);
+        putDataRatioIndex(listPETemp, changeOI, otmRationINdexName);
+    } else if (currentStockName.contains("PE") && (currentStockStrikePrice - bnCurrentValue > -50) && (currentStockStrikePrice - bnCurrentValue < 0)) {
+        putData(json, otmIndexName);
+        listPETemp.add(changeOI);
+    }
+}
 
     }
 
@@ -226,14 +237,14 @@ Double randomDoubleValue=Double.valueOf(randomValue);
         if (!json.contains("NaN")) {
             try {
                 putData(json, indexName);
-                putData(json, "bnotmratioall");
+                putData(json, indexName+"all");
             } catch (Exception e) {
                 System.out.println("OTM Ratio Exception Occured : setting 0 value");
                 ratioMapData.put("OTM Ratio", 0);
                 ratioMapData.put("timestamp", System.currentTimeMillis());
                 json = new ObjectMapper().writeValueAsString(ratioMapData);
                 putData(json, indexName);
-                putData(json, "bnotmratioall");
+                putData(json, indexName+"all");
             }
         }
     }
@@ -258,7 +269,14 @@ Double randomDoubleValue=Double.valueOf(randomValue);
         new ElasticSearchUtil().clearElastChartData("bnotm");
         new ElasticSearchUtil().clearElastChartData("bnotmratio");
         new ElasticSearchUtil().clearElastChartData("bnotmratioall");
+
+        new ElasticSearchUtil().clearElastChartData("niftyoidata");
+        new ElasticSearchUtil().clearElastChartData("niftyotm");
+        new ElasticSearchUtil().clearElastChartData("niftyotmratio");
+        new ElasticSearchUtil().clearElastChartData("niftyotmratioall");
+
         new ElasticSearchUtil().clearElastChartData("incpriincoitop5");
+
 //         new ElasticSearchUtil().clearElastChartData("bn_oi_history");
 
         // Adding time stamp
@@ -284,6 +302,22 @@ Double randomDoubleValue=Double.valueOf(randomValue);
 
         responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
                 .put("http://localhost:9200/bnotmratioall");
+        System.out.println(responseOTMRatio.prettyPrint());
+
+        responseIncTop= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+                .put("http://localhost:9200/niftyoidata");
+        System.out.println(responseIncTop.prettyPrint());
+
+        responseOTM= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+                .put("http://localhost:9200/niftyotm");
+        System.out.println(responseOTM.prettyPrint());
+
+        responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+                .put("http://localhost:9200/niftyotmratio");
+        System.out.println(responseOTMRatio.prettyPrint());
+
+        responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+                .put("http://localhost:9200/niftyotmratioall");
         System.out.println(responseOTMRatio.prettyPrint());
 
 //        Response responseBNOIHistory= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"Date\":{\"type\":\"date\"}}}}}").put("http://localhost:9200/bn_oi_history");

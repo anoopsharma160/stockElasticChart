@@ -24,19 +24,23 @@ public class NSEBankNiftyFetcher {
 
 
     public static void main(String[] args) throws IOException, ParseException {
-        System.out.println(new ObjectMapper().writeValueAsString(new NSEBankNiftyFetcher().getMappedData()));
+        System.out.println(new ObjectMapper().writeValueAsString(new NSEBankNiftyFetcher().getMappedData("https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=-10003&symbol=NIFTY&symbol=NIFTY&instrument=OPTIDX&date=-&segmentLink=17&segmentLink=17")));
     }
     public Double getBnCurrentValue(){
         return bnCurrentValue;
     }
-    public Map<String,Map<String, String>> getMappedData() throws IOException, ParseException {
+    public Map<String,Map<String, String>> getMappedData(String url) throws IOException, ParseException {
         Document doc;
-        doc = Jsoup.connect("https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=-9999&symbol=BANKNIFTY&symbol=BANKNIFTY&instrument=OPTIDX&date=-&segmentLink=17&segmentLink=17").get();
+        doc = Jsoup.connect(url).get();
 //        doc = Jsoup.connect("https://www.moneycontrol.com/stocks/fno/marketstats/futures/oi_inc_p_inc/homebody.php?opttopic=allfut&optinst=allfut&sel_mth=1&sort_order=1").get();
 //        doc = Jsoup.connect("https://www.moneycontrol.com/stocks/fno/marketstats/futures/oi_dec_p_dec/homebody.php?opttopic=allfut&optinst=allfut&sel_mth=1&sort_order=0").get();
 //        doc = Jsoup.connect("https://www.moneycontrol.com/stocks/fno/marketstats/futures/oi_dec_p_dec/homebody.php?opttopic=allfut&optinst=allfut&sel_mth=1&sort_order=0").get();
     Elements bnCurrentValueElem=doc.select("#wrapper_btm > table:nth-child(3) > tbody > tr > td:nth-child(2) > div > span:nth-child(1) > b");
-        bnCurrentValue=Double.valueOf(bnCurrentValueElem.text().replace("BANKNIFTY","").replace(" ",""));
+    if(url.contains("BANK"))
+    bnCurrentValue=Double.valueOf(bnCurrentValueElem.text().replace("BANKNIFTY","").replace(" ",""));
+    else
+        bnCurrentValue=Double.valueOf(bnCurrentValueElem.text().replace("NIFTY","").replace(" ",""));
+
         System.out.println("Bank Nifty Current Value: "+bnCurrentValue);
 
         for (Element table : doc.select("#octable")) {
