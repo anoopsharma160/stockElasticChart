@@ -1,6 +1,5 @@
 import ElasticSearch.ElasticAlert;
 import IndexNSELive.NSEBNDController;
-import MoneyControlDataFetcher.ESInsertionIncPri;
 
 import java.io.IOException;
 import java.text.ParseException;

@@ -44,7 +44,7 @@
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
-			<version>1.11.3</version>
+			<version>1.12.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mongodb</groupId>
@@ -68,12 +68,7 @@
 			<version>3.2.0</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>io.rest-assured</groupId>
-			<artifactId>rest-assured</artifactId>
-			<version>3.2.0</version>
-			<scope>compile</scope>
-		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -126,6 +121,10 @@
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
 			<version>RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>io.rest-assured</groupId>
+			<artifactId>rest-assured</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -228,7 +227,7 @@
 			</snapshots>
 		</repository>
 		<repository>
-			<id>spring-snapshots</id>
+			<id>spring-snapshotsNew</id>
 			<name>Spring Snapshots</name>
 			<url>https://mvnrepository.com/artifact/org.elasticsearch.client/elasticsearch-rest-client</url>
 			<snapshots>
@@ -236,7 +235,7 @@
 			</snapshots>
 		</repository>
 		<repository>
-			<id>spring-snapshots</id>
+			<id>spring-snapshotsNew1</id>
 			<name>Spring Snapshots</name>
 			<url>https://mvnrepository.com/artifact</url>
 			<snapshots>
@@ -247,7 +246,7 @@
 
 	<pluginRepositories>
 		<pluginRepository>
-			<id>spring-snapshots</id>
+			<id>spring-snapshotsNwq</id>
 			<name>Spring Snapshots</name>
 			<url>https://repo.spring.io/snapshot</url>
 			<snapshots>
@@ -255,7 +254,7 @@
 			</snapshots>
 		</pluginRepository>
 		<pluginRepository>
-			<id>spring-milestones</id>
+			<id>spring-milestones2121</id>
 			<name>Spring Milestones</name>
 			<url>https://repo.spring.io/milestone</url>
 			<snapshots>
