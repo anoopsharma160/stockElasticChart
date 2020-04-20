@@ -159,19 +159,27 @@ catch (NullPointerException e){
     System.out.println("Exception Occured");
 
 }
-            if(strikePVCall-bnCurrentValue<=600 &&strikePVCall-bnCurrentValue>=-400) {
+int threasholdValue=500;
+if(url.contains("symbol=NIFTY")){
+    threasholdValue=500;
+}
+else{
+    threasholdValue=1500;
+}
+
+            if(strikePVCall-bnCurrentValue<=threasholdValue &&strikePVCall-bnCurrentValue>=-threasholdValue) {
                 finalMap.put(callMap.get("Strike Price") + " CE", callMap);
             }
-            if(strikePVPut-bnCurrentValue>=-600 && strikePVPut-bnCurrentValue<=400) {
+            if(strikePVPut-bnCurrentValue>=-threasholdValue && strikePVPut-bnCurrentValue<=threasholdValue) {
                 finalMap.put(putMap.get("Strike Price") + " PE", putMap);
             }
 
 //            finalMap.put(internalmap.get("Symbol")+" "+internalmap.get("Strike Price")+" "+internalmap.get("Option Type"),internalmap);
 
             System.out.println();
-            System.out.println("Printing final map: "+finalMap);
-        }
 
+        }
+        System.out.println("Printing final map: "+finalMap);
 
 //        System.out.println("Printing the final map: "+finalMap);
 ////4 Print the new Map

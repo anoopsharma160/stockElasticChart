@@ -4,8 +4,11 @@ import ElasticSearch.ElasticSearchUtil;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.Select;
 import util.FileUtil;
 
@@ -54,13 +57,16 @@ String optionType[]={"ce","pe"};
 WebDriver driver = null;
 boolean isSuccessful = false;
         try{
-            System.setProperty("webdriver.chrome.driver","/Users/anoop/Downloads/chromedriver");
+            System.setProperty("webdriver.chrome.driver","/Users/anoop.sharma/Downloads/chromedriver");
+            DesiredCapabilities capabilities= new DesiredCapabilities();
+            capabilities.setAcceptInsecureCerts(true);
+
             driver= new ChromeDriver();
             driver.get("https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=-9999&symbol=BANKNIFTY&symbol=BANKNIFTY&instrument=OPTIDX&date=-&segmentLink=17&segmentLink=17");
             String currentBNValue=driver.findElement(By.xpath("//*[@id=\"wrapper_btm\"]/table[1]/tbody/tr/td[2]/div/span[1]/b")).getText();
             System.out.println("Current Bank Nifty Value : "+currentBNValue);
             BNCurrentValue=Double.valueOf(currentBNValue.substring(currentBNValue.indexOf(" ")));
-        driver.get("https://www.nseindia.com/products/content/derivatives/equities/historical_fo.htm");
+        driver.get("https://www1.nseindia.com/products/content/derivatives/equities/historical_fo.htm");
         selectDropDown(driver,"instrumentType"," "+stockType+" ");
         selectDropDown(driver,"symbol",symbolName);
         selectDropDown(driver,"year","2019");
