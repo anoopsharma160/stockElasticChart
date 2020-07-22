@@ -50,7 +50,7 @@ public class ElasticSearchUtil {
         request.source(dataJson, XContentType.JSON);
         IndexResponse indexResponse = client.index(request, RequestOptions.DEFAULT);
         client.close();
-        System.out.println("ES : Doc Creation "+indexResponse);
+//        System.out.println("ES : Doc Creation "+indexResponse);
         return indexResponse.status().getStatus()==201;
 
     }
@@ -143,13 +143,13 @@ catch (ParseException e){
         double changeOI;
         double vol;
             try {
-                priceLTP = decimalFormat.parse((String) map.get("LTP")).doubleValue();
-                currentOI = decimalFormat.parse((String) map.get("OI")).doubleValue();
+                priceLTP = decimalFormat.parse((String) map.get("lastPrice")).doubleValue();
+                currentOI = decimalFormat.parse((String) map.get("openInterest")).doubleValue();
 // Random Long values to change the oi for testing
 String randomValue= String.valueOf(new Random().nextLong()).substring(0,3);
 Double randomDoubleValue=Double.valueOf(randomValue);
-                 changeOI = decimalFormat.parse((String) map.get("Chng in OI")).doubleValue();
-                 vol = decimalFormat.parse((String) map.get("Volume")).doubleValue();
+                 changeOI = decimalFormat.parse((String) map.get("changeinOpenInterest")).doubleValue();
+                 vol = decimalFormat.parse((String) map.get("totalTradedVolume")).doubleValue();
             }
             catch (ParseException e){
                 priceLTP=0.0;
@@ -198,9 +198,9 @@ Double randomDoubleValue=Double.valueOf(randomValue);
             putData(json, indexName);
 // Adding data to another index OTM data
             String currentStockName= (String) map.get("Stock");
-        Double currentStockStrikePrice= Double.parseDouble(String.valueOf(map.get("Strike Price")));
+        Double currentStockStrikePrice= Double.parseDouble(String.valueOf(map.get("strikePrice")));
 // note To change the value
-        Double bnCurrentValue= new NSEBankNiftyFetcher().getBnCurrentValue();
+        Double bnCurrentValue= decimalFormat.parse((String) map.get("underlyingValue")).doubleValue();
 //        Double bnCurrentValue= new MCBNODFetcher().getBnCurrentValue();
 if(indexName.contains("bn")) {
 
@@ -220,6 +220,95 @@ if(indexName.contains("bn")) {
         listPETemp.add(changeOI);
     }
 }
+
+    }
+
+    public void storeDataESNifty(String key,Map map, String indexName,String otmIndexName,String otmRationINdexName ) throws ParseException, IOException {
+
+        map.put("Stock",key);
+        DecimalFormat decimalFormat = new DecimalFormat();
+        double priceLTP ;
+        double currentOI ;
+        double changeOI;
+        double vol;
+        try {
+            priceLTP = decimalFormat.parse((String) map.get("LTP")).doubleValue();
+            currentOI = decimalFormat.parse((String) map.get("OI")).doubleValue();
+// Random Long values to change the oi for testing
+            String randomValue= String.valueOf(new Random().nextLong()).substring(0,3);
+            Double randomDoubleValue=Double.valueOf(randomValue);
+            changeOI = decimalFormat.parse((String) map.get("Chng in OI")).doubleValue();
+            vol = decimalFormat.parse((String) map.get("Volume")).doubleValue();
+        }
+        catch (ParseException e){
+            priceLTP=0.0;
+            currentOI=0.0;
+            changeOI=0.0;
+            vol=0.0;
+        }
+
+        map.put("LTP",priceLTP);
+        map.put("OI",currentOI);
+
+//            if(bnCount++<15){
+//                map.put("Chng in OI", changeOI);
+//            }
+//            else
+        map.put("Chng in OI", changeOI);
+
+        map.put("Volume",vol);
+// Adding the Average of LTP+CHG in OI +Volume
+//        map.put("AVG of 3",priceLTP+vol/100);
+// adding the Price +vol/chnginOI
+
+        try {
+//Apply the CHG OI length logic to calculate the AVG 3 Value
+            int lengthChgOI = String.valueOf(changeOI).length()-2;
+            int lengthPrice = String.valueOf(priceLTP).length()-1;
+            int diffValue = lengthChgOI - lengthPrice;
+            if (diffValue > 0) {
+                Double avgValue = (((priceLTP)* LengthUtil.get10Digits(diffValue) / (changeOI)));
+                if (!(avgValue > 1000)){
+                    map.put("AVG of 3", avgValue);}
+                else {
+                    avgValue=1000+avgValue%1000;
+                    map.put("AVG of 3", avgValue / 1000);
+                }
+            }
+        }
+        catch (Exception e){
+            System.out.println("Exception Occured: "+e);
+            map.put("AVG of 3", -1.00d);
+        }
+        map.put("Price and Vol",priceLTP+vol);
+        map.put("timestamp",System.currentTimeMillis());
+        String json=new ObjectMapper().writeValueAsString(map);
+
+        putData(json, indexName);
+// Adding data to another index OTM data
+        String currentStockName= (String) map.get("Stock");
+        Double currentStockStrikePrice= Double.parseDouble(String.valueOf(map.get("Strike Price")));
+// note To change the value
+        Double bnCurrentValue= new NSEBankNiftyFetcher().getBnCurrentValue();
+//        Double bnCurrentValue= new MCBNODFetcher().getBnCurrentValue();
+        if(indexName.contains("bn")) {
+
+            if (currentStockName.contains("CE") && (currentStockStrikePrice - bnCurrentValue > 0) && (currentStockStrikePrice - bnCurrentValue < 100)) {
+                putData(json, otmIndexName);
+                putDataRatioIndex(listPETemp, changeOI, otmRationINdexName);
+            } else if (currentStockName.contains("PE") && (currentStockStrikePrice - bnCurrentValue > -100) && (currentStockStrikePrice - bnCurrentValue < 0)) {
+                putData(json, otmIndexName);
+                listPETemp.add(changeOI);
+            }
+        }else{
+            if (currentStockName.contains("CE") && (currentStockStrikePrice - bnCurrentValue > 0) && (currentStockStrikePrice - bnCurrentValue < 50)) {
+                putData(json, otmIndexName);
+                putDataRatioIndex(listPETemp, changeOI, otmRationINdexName);
+            } else if (currentStockName.contains("PE") && (currentStockStrikePrice - bnCurrentValue > -50) && (currentStockStrikePrice - bnCurrentValue < 0)) {
+                putData(json, otmIndexName);
+                listPETemp.add(changeOI);
+            }
+        }
 
     }
 
@@ -334,11 +423,35 @@ if(indexName.contains("bn")) {
                 .put("http://localhost:9200/incpriincoitop5");
         System.out.println(incPriIncOiIndex.prettyPrint());
 
-        Response niftyPcrIndex= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+        Response niftyPcrIndex= RestAssured.given().contentType("application/json").body("{\n" +
+                "  \"mappings\": {\n" +
+                "    \"properties\": {\n" +
+                "      \"timestamp\": {\n" +
+                "        \"type\": \"date\"\n" +
+                "      },\n" +
+                "      \"publisher\": {\n" +
+                "          \"type\": \"text\",\n" +
+                "          \"fielddata\": true\n" +
+                "        }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}")
                 .put("http://localhost:9200/niftypcrindex");
         System.out.println(niftyPcrIndex.prettyPrint());
 
-        Response bnPcrIndex= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+        Response bnPcrIndex= RestAssured.given().contentType("application/json").body("{\n" +
+                "  \"mappings\": {\n" +
+                "    \"properties\": {\n" +
+                "      \"timestamp\": {\n" +
+                "        \"type\": \"date\"\n" +
+                "      },\n" +
+                "      \"publisher\": {\n" +
+                "          \"type\": \"text\",\n" +
+                "          \"fielddata\": true\n" +
+                "        }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}")
                 .put("http://localhost:9200/bnpcrindex");
         System.out.println(bnPcrIndex.prettyPrint());
     }

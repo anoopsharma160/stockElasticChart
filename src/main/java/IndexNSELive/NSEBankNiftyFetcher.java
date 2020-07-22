@@ -80,12 +80,12 @@ public class NSEBankNiftyFetcher {
         }
 
 
-        System.out.print(th.text()+"  ");
+//        System.out.print(th.text()+"  ");
     }
                 }
                     for (Element tdElement : trElement.getElementsByTag("td")) {
                         String intText=tdElement.text();
-                        System.out.print(tdElement.text() + "  ");
+//                        System.out.print(tdElement.text() + "  ");
                         if(intText.contains("%")){
                             intText=intText.replace("%","");
                         }
@@ -104,8 +104,8 @@ public class NSEBankNiftyFetcher {
                 }
         }
 //1 Printing the header list
-        System.out.println("Header List after Web srapping: "+headersList);
-        System.out.println("Rows List: "+rowData);
+//        System.out.println("Header List after Web srapping: "+headersList);
+//        System.out.println("Rows List: "+rowData);
 
 //
 //
@@ -161,10 +161,10 @@ catch (NullPointerException e){
 }
 int threasholdValue=500;
 if(url.contains("symbol=NIFTY")){
-    threasholdValue=500;
+    threasholdValue=2000;
 }
 else{
-    threasholdValue=1500;
+    threasholdValue=3500;
 }
 
             if(strikePVCall-bnCurrentValue<=threasholdValue &&strikePVCall-bnCurrentValue>=-threasholdValue) {
@@ -179,7 +179,7 @@ else{
             System.out.println();
 
         }
-        System.out.println("Printing final map: "+finalMap);
+
 
 //        System.out.println("Printing the final map: "+finalMap);
 ////4 Print the new Map
@@ -196,7 +196,7 @@ else{
 //            }
 //            System.out.println();
 //        }
-
+        System.out.println("Printing final map: "+finalMap);
         return finalMap;
 
 

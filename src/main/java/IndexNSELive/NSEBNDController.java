@@ -10,6 +10,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
+import util.ParseJSON;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -37,17 +38,19 @@ public class NSEBNDController {
         double chgOiPcr=0;
         double volPcr=0;
 
-        Map<String, Map<String, String>> map = new NSEBankNiftyFetcher().getMappedData("https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=-9999&symbol=BANKNIFTY&symbol=BANKNIFTY&instrument=OPTIDX&date=-&segmentLink=17&segmentLink=17");
+//        Map<String, Map<String, String>> map = new NSEBankNiftyFetcher().getMappedData("https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=-9999&symbol=BANKNIFTY&symbol=BANKNIFTY&instrument=OPTIDX&date=-&segmentLink=17&segmentLink=17");
+        Map<String,Map<String,String>> map= ParseJSON.getMap();
 //        Map<String, Map<String, String>> map = new MCBNODFetcher().getMappedData("https://www.moneycontrol.com/stocks/fno/view_option_chain.php?ind_id=23&sel_exp_date=20190725");
-            Double bnCurrentValue=new NSEBankNiftyFetcher().getBnCurrentValue();
+//            Double bnCurrentValue=new NSEBankNiftyFetcher().getBnCurrentValue();
+        Double bnCurrentValue=new DecimalFormat().parse(ParseJSON.getBnCurrentValue()).doubleValue();
 
             for (String key : map.keySet()) {
                 if(!key.contains("null")) {
-                    Map<String, String> internalMap = map.get(key);
-                    System.out.println(internalMap.get("Strike Price"));
+                    Map internalMap = map.get(key);
+                    System.out.println(internalMap.get("strikePrice"));
 //                    decimalFormat.parse((String) map.get("LTP")).doubleValue();
 
-                    Double strikePriceValue= new DecimalFormat().parse(internalMap.get("Strike Price")).doubleValue();
+//                    Double strikePriceValue= new DecimalFormat().parse(internalMap.get("strikePrice"));
 //                    Double bnCurrentVal=new NSEBankNiftyFetcher().getBnCurrentValue();
 //                    if((strikePriceValue-bnCurrentValue>=-1900)&&(strikePriceValue-bnCurrentValue<=1900))
                     new ElasticSearchUtil().storeDataElasticSearchNSEBN(key,internalMap, "bnnseoidata","bnotm","bnotmratio");
@@ -68,9 +71,9 @@ public class NSEBNDController {
                     volPE+=(double)valueMap.getOrDefault("Volume",0.0);
                 }
             }
-        oiPcr=oiCE/oiPE;
-        chgOiPcr=chgOiCE/chgOiPE;
-        volPcr=volCE/volPE;
+        oiPcr=oiPE/oiCE;
+        chgOiPcr=chgOiPE/chgOiCE;
+        volPcr=volPE/volCE;
         //Construct map
         Map pcrMap= new HashMap();
         pcrMap.put("BN Current",bnCurrentValue);
@@ -108,7 +111,7 @@ public class NSEBNDController {
                 Double strikePriceValue= new DecimalFormat().parse(internalMap.get("Strike Price")).doubleValue();
 //                    Double bnCurrentVal=new NSEBankNiftyFetcher().getBnCurrentValue();
 //                    if((strikePriceValue-bnCurrentValue>=-1900)&&(strikePriceValue-bnCurrentValue<=1900))
-                new ElasticSearchUtil().storeDataElasticSearchNSEBN(key,internalMap, "niftyoidata","niftyotm","niftyotmratio");
+                new ElasticSearchUtil().storeDataESNifty(key,internalMap, "niftyoidata","niftyotm","niftyotmratio");
 
                 Map valueMap=map.get(key);
 
@@ -127,9 +130,9 @@ public class NSEBNDController {
             }
 
         }
-        oiPcr=oiCE/oiPE;
-        chgOiPcr=chgOiCE/chgOiPE;
-        volPcr=volCE/volPE;
+        oiPcr=oiPE/oiCE;
+        chgOiPcr=chgOiPE/chgOiCE;
+        volPcr=volPE/volCE;
         //Construct map
         Map pcrMap= new HashMap();
         pcrMap.put("Nifty Current",bnCurrentValue);

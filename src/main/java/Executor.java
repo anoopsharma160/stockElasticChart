@@ -9,11 +9,11 @@ public class Executor {
         for (int i = 0; i <5000 ; i++) {
            try {
                System.out.println("Thread waiting for 2 minutes");
-               Thread.sleep(90000);
+//               Thread.sleep(90000);
                NSEBNDController object=new NSEBNDController();
                // Call for BN
                object.execute(0);
-               // Call for Nifty
+               // Call for NiftyR
                object.executeNifty(0);
                System.out.println("Count : " + i);
            }
@@ -21,19 +21,19 @@ public class Executor {
                System.out.println("Exception catched");
                e.printStackTrace();
            }
-// Generating the alert
-            try {
-                Thread.sleep(1000);
-                ElasticAlert.triggerAlert(String.valueOf(System.currentTimeMillis()), String.valueOf(System.currentTimeMillis() - 100000),
-                        "2 Minute Alert",5000,-2000);
-
-                ElasticAlert.triggerAlert(String.valueOf(System.currentTimeMillis()), String.valueOf(System.currentTimeMillis() - 600000),
-                        "10 Minute Alert",15000,-10000);
-            }
-            catch (Exception e){
-                System.out.println("Alert Exception occurred!!!!");
-                e.printStackTrace();
-            }
+//// Generating the alert
+//            try {
+//                Thread.sleep(1000);
+//                ElasticAlert.triggerAlert(String.valueOf(System.currentTimeMillis()), String.valueOf(System.currentTimeMillis() - 100000),
+//                        "2 Minute Alert",5000,-2000);
+//
+//                ElasticAlert.triggerAlert(String.valueOf(System.currentTimeMillis()), String.valueOf(System.currentTimeMillis() - 600000),
+//                        "10 Minute Alert",15000,-10000);
+//            }
+//            catch (Exception e){
+//                System.out.println("Alert Exception occurred!!!!");
+//                e.printStackTrace();
+//            }
 // Executing Inc OI Inc Pri Method
 //            try{
 ////            new ESInsertionIncPri().execute(0);}
