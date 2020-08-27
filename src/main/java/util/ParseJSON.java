@@ -1,5 +1,6 @@
 package util;
 
+import DailyOIHistory.Utils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpRequest;
@@ -18,6 +19,10 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,8 +32,10 @@ public class ParseJSON {
     public static String getBnCurrentValue(){
         return bnCurrentValue;
     }
-    public static Map getMap() throws IOException {
-        Document document= Jsoup.connect("https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY&expiryDate=23-Jul-2020").ignoreContentType(true)
+    public static Map getMap() throws IOException, ParseException {
+        String nextExpiry= Utils.returnNextExpiry("Index");
+        nextExpiry=new SimpleDateFormat("dd-MMM-yyyy").format(new SimpleDateFormat("dd-MM-yyyy").parse(nextExpiry));
+        Document document= Jsoup.connect("https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY&expiryDate="+nextExpiry).ignoreContentType(true)
                 .userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36").get();
 //        System.out.println(document.text());
         JSONObject jsonObject = new JSONObject(document.text());

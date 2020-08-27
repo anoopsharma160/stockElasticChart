@@ -206,7 +206,7 @@ if(indexName.contains("bn")) {
 
     if (currentStockName.contains("CE") && (currentStockStrikePrice - bnCurrentValue > 0) && (currentStockStrikePrice - bnCurrentValue < 100)) {
         putData(json, otmIndexName);
-        putDataRatioIndex(listPETemp, changeOI, otmRationINdexName);
+//        putDataRatioIndex(listPETemp, changeOI, otmRationINdexName);
     } else if (currentStockName.contains("PE") && (currentStockStrikePrice - bnCurrentValue > -100) && (currentStockStrikePrice - bnCurrentValue < 0)) {
         putData(json, otmIndexName);
         listPETemp.add(changeOI);
