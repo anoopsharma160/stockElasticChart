@@ -1,5 +1,6 @@
 package ElasticSearch;
 
+import IndexNSELive.MCBNODFetcher;
 import IndexNSELive.NSEBankNiftyFetcher;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
@@ -14,6 +15,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
 import util.LengthUtil;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -143,13 +145,13 @@ catch (ParseException e){
         double changeOI;
         double vol;
             try {
-                priceLTP = decimalFormat.parse((String) map.get("lastPrice")).doubleValue();
-                currentOI = decimalFormat.parse((String) map.get("openInterest")).doubleValue();
+                priceLTP = decimalFormat.parse((String) map.get("LTP")).doubleValue();
+                currentOI = decimalFormat.parse((String) map.get("OI")).doubleValue();
 // Random Long values to change the oi for testing
 String randomValue= String.valueOf(new Random().nextLong()).substring(0,3);
 Double randomDoubleValue=Double.valueOf(randomValue);
-                 changeOI = decimalFormat.parse((String) map.get("changeinOpenInterest")).doubleValue();
-                 vol = decimalFormat.parse((String) map.get("totalTradedVolume")).doubleValue();
+                 changeOI = decimalFormat.parse((String) map.get("Chng in OI")).doubleValue();
+                 vol = decimalFormat.parse((String) map.get("Volume")).doubleValue();
             }
             catch (ParseException e){
                 priceLTP=0.0;
@@ -198,10 +200,10 @@ Double randomDoubleValue=Double.valueOf(randomValue);
             putData(json, indexName);
 // Adding data to another index OTM data
             String currentStockName= (String) map.get("Stock");
-        Double currentStockStrikePrice= Double.parseDouble(String.valueOf(map.get("strikePrice")));
+        Double currentStockStrikePrice= Double.parseDouble(String.valueOf(map.get("Strike Price")));
 // note To change the value
-        Double bnCurrentValue= decimalFormat.parse((String) map.get("underlyingValue")).doubleValue();
-//        Double bnCurrentValue= new MCBNODFetcher().getBnCurrentValue();
+//        Double bnCurrentValue= decimalFormat.parse((String) map.get("underlyingValue")).doubleValue();
+        Double bnCurrentValue= new NSEBankNiftyFetcher().getBnCurrentValue();
 if(indexName.contains("bn")) {
 
     if (currentStockName.contains("CE") && (currentStockStrikePrice - bnCurrentValue > 0) && (currentStockStrikePrice - bnCurrentValue < 100)) {
@@ -290,6 +292,7 @@ if(indexName.contains("bn")) {
         Double currentStockStrikePrice= Double.parseDouble(String.valueOf(map.get("Strike Price")));
 // note To change the value
         Double bnCurrentValue= new NSEBankNiftyFetcher().getBnCurrentValue();
+//        Double bnCurrentValue= decimalFormat.parse((String) map.get("underlyingValue")).doubleValue();
 //        Double bnCurrentValue= new MCBNODFetcher().getBnCurrentValue();
         if(indexName.contains("bn")) {
 
@@ -349,10 +352,22 @@ if(indexName.contains("bn")) {
         client.close();
 
     }
+    public Response importSavedObject(String fileName){
+        String host = "http://localhost:5601";
+        String apiEndPoint = "/api/saved_objects/_import";
+        Response response = RestAssured.given().contentType("multipart/form-data")
+                .header("kbn-xsrf","true")
+                .multiPart("file",new File(fileName))
+                .post(host+apiEndPoint);
+        return response;
+
+
+    }
 
     public static void main(String[] args) throws IOException {
 //        new ElasticSearchUtil().clearElastChartData("incpriincoitop");
-
+        Response response = new ElasticSearchUtil().importSavedObject("src/main/resources/elasticSearchBackup/export.ndjson");
+    try {
 
         new ElasticSearchUtil().clearElastChartData("bnnseoidata");
         new ElasticSearchUtil().clearElastChartData("bnotm");
@@ -366,12 +381,16 @@ if(indexName.contains("bn")) {
 //
         new ElasticSearchUtil().clearElastChartData("incpriincoitop5");
 
-         new ElasticSearchUtil().clearElastChartData("bn_oi_history");
+        new ElasticSearchUtil().clearElastChartData("bn_oi_history");
 
-         new ElasticSearchUtil().clearElastChartData("niftypcrindex");
+        new ElasticSearchUtil().clearElastChartData("niftypcrindex");
         new ElasticSearchUtil().clearElastChartData("bnpcrindex");
 
-
+    }
+    catch (Exception e){
+        System.out.println("Exception catched!!!");
+        System.out.println("Index not found in elasticsearch");
+    }
 
 
 

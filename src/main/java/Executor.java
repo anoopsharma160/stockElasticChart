@@ -8,8 +8,9 @@ public class Executor {
     public static void main(String[] args) throws InterruptedException, ParseException, IOException {
         for (int i = 0; i <5000 ; i++) {
 
-               System.out.println("Thread waiting foˀr 2 minutes");
+               System.out.println("Thread waiting for 2 minutes");
                Thread.sleep(90000);
+//                Thread.sleep(900);
                NSEBNDController object=new NSEBNDController();
                // Call for BN
                try {
@@ -17,7 +18,7 @@ public class Executor {
                }
 
            catch (Exception e){
-               System.out.println("Exception catched");
+              System.out.println("Exception catched");
                e.printStackTrace();
            }
                try{

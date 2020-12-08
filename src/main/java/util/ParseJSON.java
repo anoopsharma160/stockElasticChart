@@ -32,10 +32,10 @@ public class ParseJSON {
     public static String getBnCurrentValue(){
         return bnCurrentValue;
     }
-    public static Map getMap() throws IOException, ParseException {
+    public static Map getMap(String url) throws IOException, ParseException {
         String nextExpiry= Utils.returnNextExpiry("Index");
         nextExpiry=new SimpleDateFormat("dd-MMM-yyyy").format(new SimpleDateFormat("dd-MM-yyyy").parse(nextExpiry));
-        Document document= Jsoup.connect("https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY&expiryDate="+nextExpiry).ignoreContentType(true)
+        Document document= Jsoup.connect(url+nextExpiry).ignoreContentType(true)
                 .userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36").get();
 //        System.out.println(document.text());
         JSONObject jsonObject = new JSONObject(document.text());

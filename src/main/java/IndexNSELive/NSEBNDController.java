@@ -38,11 +38,12 @@ public class NSEBNDController {
         double chgOiPcr=0;
         double volPcr=0;
 
-//        Map<String, Map<String, String>> map = new NSEBankNiftyFetcher().getMappedData("https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=-9999&symbol=BANKNIFTY&symbol=BANKNIFTY&instrument=OPTIDX&date=-&segmentLink=17&segmentLink=17");
-        Map<String,Map<String,String>> map= ParseJSON.getMap();
+        Map<String, Map<String, String>> map = new NSEBankNiftyFetcher().getMappedData("https://www1.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=-9999&symbol=BANKNIFTY&symbol=BANKNIFTY&instrument=OPTIDX&date=-&segmentLink=17&segmentLink=17");
+//        Map<String,Map<String,String>> map= ParseJSON.getMap("https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY&expiryDate=");
+//        Map<String,Map<String,String>> map= ParseJSON.getMap("https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY&expiryDate=");
 //        Map<String, Map<String, String>> map = new MCBNODFetcher().getMappedData("https://www.moneycontrol.com/stocks/fno/view_option_chain.php?ind_id=23&sel_exp_date=20190725");
 //            Double bnCurrentValue=new NSEBankNiftyFetcher().getBnCurrentValue();
-        Double bnCurrentValue=new DecimalFormat().parse(ParseJSON.getBnCurrentValue()).doubleValue();
+        Double bnCurrentValue=new NSEBankNiftyFetcher().getBnCurrentValue();
 
             for (String key : map.keySet()) {
                 if(!key.contains("null")) {
@@ -89,7 +90,9 @@ public class NSEBNDController {
 //Thread.sleep(sleepTime*1000);
 
         Map<String, Map<String, String>> map = new NSEBankNiftyFetcher().getMappedData("https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=-10003&symbol=NIFTY&symbol=NIFTY&instrument=OPTIDX&date=-&segmentLink=17&segmentLink=17");
+//        Map<String,Map<String,String>> map= ParseJSON.getMap("https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY&expiryDate=");
         Double bnCurrentValue=new NSEBankNiftyFetcher().getBnCurrentValue();
+//        Double bnCurrentValue=new DecimalFormat().parse(ParseJSON.getBnCurrentValue()).doubleValue();
         double oiCE = 0;
         double oiPE = 0;
         double chgOiCE = 0;
