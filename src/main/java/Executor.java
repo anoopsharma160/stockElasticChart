@@ -10,7 +10,7 @@ public class Executor {
 
                System.out.println("Thread waiting for 2 minutes");
                Thread.sleep(90000);
-//                Thread.sleep(900);
+                Thread.sleep(900);
                NSEBNDController object=new NSEBNDController();
                // Call for BN
                try {
