@@ -35,7 +35,14 @@ public class ParseJSON {
     public static Map getMap(String url) throws IOException, ParseException {
         String nextExpiry= Utils.returnNextExpiry("Index");
         nextExpiry=new SimpleDateFormat("dd-MMM-yyyy").format(new SimpleDateFormat("dd-MM-yyyy").parse(nextExpiry));
-        Document document= Jsoup.connect(url+nextExpiry).ignoreContentType(true)
+//        Map headers = new HashMap();
+//        headers.put("accept","*/*");
+//        headers.put("accept-encoding","gzip, deflate, br");
+//
+//        headers.put("sec-fetch-site","same-origin");
+//
+//        System.setProperty("javax.net.ssl.trustStore", "/Users/anoop.sharma/Downloads/GeoTrustRSACA2018.crt");
+        Document document= Jsoup.connect(url).ignoreContentType(true)
                 .userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36").get();
 //        System.out.println(document.text());
         JSONObject jsonObject = new JSONObject(document.text());
@@ -45,22 +52,26 @@ public class ParseJSON {
         for (int i=0; i<dataJsonArray.length();i++){
             JSONObject elem= (JSONObject) dataJsonArray.get(i);
             int strikrPrice= elem.getInt("strikePrice");
-            for(String el: elem.keySet()){
-                Map <String,String>insideMap= new HashMap();
-                if(el.equalsIgnoreCase("CE")){
-                    String newKey=strikrPrice+" "+el;
 
-                    insideMap=new ObjectMapper().readValue(elem.get("CE").toString(),new TypeReference<HashMap<String,String>>(){});
-                    map.put(newKey,insideMap);
-                    bnCurrentValue=insideMap.get("underlyingValue");
-                }
-                else if(el.equalsIgnoreCase("PE")){
-                    String newKey=strikrPrice+" "+el;
-                    insideMap=new ObjectMapper().readValue(elem.get("PE").toString(),new TypeReference<HashMap<String,String>>(){});
-                    map.put(newKey,insideMap);
-                    bnCurrentValue=insideMap.get("underlyingValue");
-                }
+            if (elem.getString("expiryDate").equalsIgnoreCase(nextExpiry)){
+                for (String el : elem.keySet()) {
+                    Map<String, String> insideMap = new HashMap();
+                    if (el.equalsIgnoreCase("CE")) {
+                        String newKey = strikrPrice + " " + el;
 
+                        insideMap = new ObjectMapper().readValue(elem.get("CE").toString(), new TypeReference<HashMap<String, String>>() {
+                        });
+                        map.put(newKey, insideMap);
+                        bnCurrentValue = insideMap.get("underlyingValue");
+                    } else if (el.equalsIgnoreCase("PE")) {
+                        String newKey = strikrPrice + " " + el;
+                        insideMap = new ObjectMapper().readValue(elem.get("PE").toString(), new TypeReference<HashMap<String, String>>() {
+                        });
+                        map.put(newKey, insideMap);
+                        bnCurrentValue = insideMap.get("underlyingValue");
+                    }
+
+                }
             }
 
         }

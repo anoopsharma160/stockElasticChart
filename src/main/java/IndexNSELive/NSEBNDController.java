@@ -38,38 +38,53 @@ public class NSEBNDController {
         double chgOiPcr=0;
         double volPcr=0;
 
-        Map<String, Map<String, String>> map = new NSEBankNiftyFetcher().getMappedData("https://www1.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=-9999&symbol=BANKNIFTY&symbol=BANKNIFTY&instrument=OPTIDX&date=-&segmentLink=17&segmentLink=17");
-//        Map<String,Map<String,String>> map= ParseJSON.getMap("https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY&expiryDate=");
+//        Map<String, Map<String, String>> map = new NSEBankNiftyFetcher().getMappedData("https://www1.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=-9999&symbol=BANKNIFTY&symbol=BANKNIFTY&instrument=OPTIDX&date=-&segmentLink=17&segmentLink=17");
+//        Map<String,Map<String,String>> map= ParseJSON.getMap("https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY");
 //        Map<String,Map<String,String>> map= ParseJSON.getMap("https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY&expiryDate=");
 //        Map<String, Map<String, String>> map = new MCBNODFetcher().getMappedData("https://www.moneycontrol.com/stocks/fno/view_option_chain.php?ind_id=23&sel_exp_date=20190725");
 //            Double bnCurrentValue=new NSEBankNiftyFetcher().getBnCurrentValue();
-        Double bnCurrentValue=new NSEBankNiftyFetcher().getBnCurrentValue();
+//        Double bnCurrentValue=new NSEBankNiftyFetcher().getBnCurrentValue();
+        Map<String,Map<String,String>> map = null;
+//        Map<String, Map<String, String>> map = new NSEBankNiftyFetcher().getMappedData("https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=-10003&symbol=NIFTY&symbol=NIFTY&instrument=OPTIDX&date=-&segmentLink=17&segmentLink=17");
+        for (int i = 0; i <20 ; i++) {
+            System.out.println("Trying api call");
+            Thread.sleep(1000);
+            try {
+                map = ParseJSON.getMap("https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY");
+                break;
+            }catch (Exception e){
+                System.out.println("API Call failed!! "+e.toString());
+            }
+        }
+
+        Double bnCurrentValue=new DecimalFormat().parse(ParseJSON.getBnCurrentValue()).doubleValue();
 
             for (String key : map.keySet()) {
-                if(!key.contains("null")) {
-                    Map internalMap = map.get(key);
+                if (!key.contains("null")) {
+                    Map<String, String> internalMap = map.get(key);
                     System.out.println(internalMap.get("strikePrice"));
 //                    decimalFormat.parse((String) map.get("LTP")).doubleValue();
 
-//                    Double strikePriceValue= new DecimalFormat().parse(internalMap.get("strikePrice"));
+                    Double strikePriceValue = new DecimalFormat().parse(internalMap.get("strikePrice")).doubleValue();
 //                    Double bnCurrentVal=new NSEBankNiftyFetcher().getBnCurrentValue();
 //                    if((strikePriceValue-bnCurrentValue>=-1900)&&(strikePriceValue-bnCurrentValue<=1900))
-                    new ElasticSearchUtil().storeDataElasticSearchNSEBN(key,internalMap, "bnnseoidata","bnotm","bnotmratio");
+                    if ((bnCurrentValue - strikePriceValue >= -1000) && (bnCurrentValue - strikePriceValue <= 1000)) {
+                        new ElasticSearchUtil().storeDataElasticSearchNSEBN(key, internalMap, "bnnseoidata", "bnotm", "bnotmratio");
 
-                }
 
-                Map valueMap=map.get(key);
+                        Map valueMap = map.get(key);
 
-                // Logic for PCR
-                if(key.contains("CE")){
-                    oiCE+=(double)valueMap.getOrDefault("OI",0.0);
-                    chgOiCE+=(double)valueMap.getOrDefault("Chng in OI",0.0);
-                    volCE+=(double)valueMap.getOrDefault("Volume",0.0);
-                }
-                else{
-                    oiPE+=(double)valueMap.getOrDefault("OI",0.0);
-                    chgOiPE+=(double)valueMap.getOrDefault("Chng in OI",0.0);
-                    volPE+=(double)valueMap.getOrDefault("Volume",0.0);
+                        // Logic for PCR
+                        if (key.contains("CE")) {
+                            oiCE += (double) valueMap.getOrDefault("OI", 0.0);
+                            chgOiCE += (double) valueMap.getOrDefault("Chng in OI", 0.0);
+                            volCE += (double) valueMap.getOrDefault("Volume", 0.0);
+                        } else {
+                            oiPE += (double) valueMap.getOrDefault("OI", 0.0);
+                            chgOiPE += (double) valueMap.getOrDefault("Chng in OI", 0.0);
+                            volPE += (double) valueMap.getOrDefault("Volume", 0.0);
+                        }
+                    }
                 }
             }
         oiPcr=oiPE/oiCE;
@@ -88,11 +103,21 @@ public class NSEBNDController {
         }
     public void executeNifty(int sleepTime) throws IOException, InterruptedException, ParseException {
 //Thread.sleep(sleepTime*1000);
-
-        Map<String, Map<String, String>> map = new NSEBankNiftyFetcher().getMappedData("https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=-10003&symbol=NIFTY&symbol=NIFTY&instrument=OPTIDX&date=-&segmentLink=17&segmentLink=17");
-//        Map<String,Map<String,String>> map= ParseJSON.getMap("https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY&expiryDate=");
-        Double bnCurrentValue=new NSEBankNiftyFetcher().getBnCurrentValue();
-//        Double bnCurrentValue=new DecimalFormat().parse(ParseJSON.getBnCurrentValue()).doubleValue();
+        Map<String,Map<String,String>> map = null;
+//        Map<String, Map<String, String>> map = new NSEBankNiftyFetcher().getMappedData("https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=-10003&symbol=NIFTY&symbol=NIFTY&instrument=OPTIDX&date=-&segmentLink=17&segmentLink=17");
+        for (int i = 0; i <10 ; i++) {
+            System.out.println("Trying api call");
+            Thread.sleep(1000);
+            try {
+                map = ParseJSON.getMap("https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY");
+                break;
+            }catch (Exception e){
+                System.out.println("API Call failed!! "+e.toString());
+            }
+        }
+        
+//        Double bnCurrentValue=new NSEBankNiftyFetcher().getBnCurrentValue();
+        Double bnCurrentValue=new DecimalFormat().parse(ParseJSON.getBnCurrentValue()).doubleValue();
         double oiCE = 0;
         double oiPE = 0;
         double chgOiCE = 0;
@@ -108,28 +133,30 @@ public class NSEBNDController {
         for (String key : map.keySet()) {
             if(!key.contains("null")) {
                 Map<String, String> internalMap = map.get(key);
-                System.out.println(internalMap.get("Strike Price"));
+                System.out.println(internalMap.get("strikePrice"));
 //                    decimalFormat.parse((String) map.get("LTP")).doubleValue();
 
-                Double strikePriceValue= new DecimalFormat().parse(internalMap.get("Strike Price")).doubleValue();
+                Double strikePriceValue = new DecimalFormat().parse(internalMap.get("strikePrice")).doubleValue();
+                // Logic to control range of data
+                if ((bnCurrentValue - strikePriceValue > -600) && (bnCurrentValue - strikePriceValue < 600)) {
 //                    Double bnCurrentVal=new NSEBankNiftyFetcher().getBnCurrentValue();
 //                    if((strikePriceValue-bnCurrentValue>=-1900)&&(strikePriceValue-bnCurrentValue<=1900))
-                new ElasticSearchUtil().storeDataESNifty(key,internalMap, "niftyoidata","niftyotm","niftyotmratio");
+                    new ElasticSearchUtil().storeDataESNifty(key, internalMap, "niftyoidata", "niftyotm", "niftyotmratio");
 
-                Map valueMap=map.get(key);
+                    Map valueMap = map.get(key);
 
-                // Logic for PCR
-                if(key.contains("CE")){
-                    oiCE+=(double)valueMap.getOrDefault("OI",0.0);
-                    chgOiCE+=(double)valueMap.getOrDefault("Chng in OI",0.0);
-                    volCE+=(double)valueMap.getOrDefault("Volume",0.0);
+                    // Logic for PCR
+                    if (key.contains("CE")) {
+                        oiCE += (double) valueMap.getOrDefault("OI", 0.0);
+                        chgOiCE += (double) valueMap.getOrDefault("Chng in OI", 0.0);
+                        volCE += (double) valueMap.getOrDefault("Volume", 0.0);
+                    } else {
+                        oiPE += (double) valueMap.getOrDefault("OI", 0.0);
+                        chgOiPE += (double) valueMap.getOrDefault("Chng in OI", 0.0);
+                        volPE += (double) valueMap.getOrDefault("Volume", 0.0);
+                    }
+
                 }
-                else{
-                    oiPE+=(double)valueMap.getOrDefault("OI",0.0);
-                    chgOiPE+=(double)valueMap.getOrDefault("Chng in OI",0.0);
-                    volPE+=(double)valueMap.getOrDefault("Volume",0.0);
-                }
-
             }
 
         }

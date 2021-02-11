@@ -145,13 +145,13 @@ catch (ParseException e){
         double changeOI;
         double vol;
             try {
-                priceLTP = decimalFormat.parse((String) map.get("LTP")).doubleValue();
-                currentOI = decimalFormat.parse((String) map.get("OI")).doubleValue();
+                priceLTP = decimalFormat.parse((String) map.get("lastPrice")).doubleValue();
+                currentOI = decimalFormat.parse((String) map.get("openInterest")).doubleValue();
 // Random Long values to change the oi for testing
 String randomValue= String.valueOf(new Random().nextLong()).substring(0,3);
 Double randomDoubleValue=Double.valueOf(randomValue);
-                 changeOI = decimalFormat.parse((String) map.get("Chng in OI")).doubleValue();
-                 vol = decimalFormat.parse((String) map.get("Volume")).doubleValue();
+                 changeOI = decimalFormat.parse((String) map.get("changeinOpenInterest")).doubleValue();
+                 vol = decimalFormat.parse((String) map.get("totalTradedVolume")).doubleValue();
             }
             catch (ParseException e){
                 priceLTP=0.0;
@@ -199,16 +199,16 @@ Double randomDoubleValue=Double.valueOf(randomValue);
 
             putData(json, indexName);
 // Adding data to another index OTM data
-            String currentStockName= (String) map.get("Stock");
-        Double currentStockStrikePrice= Double.parseDouble(String.valueOf(map.get("Strike Price")));
+        String currentStockName= (String) map.get("Stock");
+        Double currentStockStrikePrice= Double.parseDouble(String.valueOf(map.get("strikePrice")));
 // note To change the value
-//        Double bnCurrentValue= decimalFormat.parse((String) map.get("underlyingValue")).doubleValue();
-        Double bnCurrentValue= new NSEBankNiftyFetcher().getBnCurrentValue();
+        Double bnCurrentValue= decimalFormat.parse((String) map.get("underlyingValue")).doubleValue();
+//        Double bnCurrentValue= new NSEBankNiftyFetcher().getBnCurrentValue();
 if(indexName.contains("bn")) {
 
     if (currentStockName.contains("CE") && (currentStockStrikePrice - bnCurrentValue > 0) && (currentStockStrikePrice - bnCurrentValue < 100)) {
         putData(json, otmIndexName);
-//        putDataRatioIndex(listPETemp, changeOI, otmRationINdexName);
+        putDataRatioIndex(listPETemp, changeOI, otmRationINdexName);
     } else if (currentStockName.contains("PE") && (currentStockStrikePrice - bnCurrentValue > -100) && (currentStockStrikePrice - bnCurrentValue < 0)) {
         putData(json, otmIndexName);
         listPETemp.add(changeOI);
@@ -234,13 +234,13 @@ if(indexName.contains("bn")) {
         double changeOI;
         double vol;
         try {
-            priceLTP = decimalFormat.parse((String) map.get("LTP")).doubleValue();
-            currentOI = decimalFormat.parse((String) map.get("OI")).doubleValue();
+            priceLTP = decimalFormat.parse((String) map.get("lastPrice")).doubleValue();
+            currentOI = decimalFormat.parse((String) map.get("openInterest")).doubleValue();
 // Random Long values to change the oi for testing
             String randomValue= String.valueOf(new Random().nextLong()).substring(0,3);
             Double randomDoubleValue=Double.valueOf(randomValue);
-            changeOI = decimalFormat.parse((String) map.get("Chng in OI")).doubleValue();
-            vol = decimalFormat.parse((String) map.get("Volume")).doubleValue();
+            changeOI = decimalFormat.parse((String) map.get("changeinOpenInterest")).doubleValue();
+            vol = decimalFormat.parse((String) map.get("totalTradedVolume")).doubleValue();
         }
         catch (ParseException e){
             priceLTP=0.0;
@@ -289,16 +289,16 @@ if(indexName.contains("bn")) {
         putData(json, indexName);
 // Adding data to another index OTM data
         String currentStockName= (String) map.get("Stock");
-        Double currentStockStrikePrice= Double.parseDouble(String.valueOf(map.get("Strike Price")));
+        Double currentStockStrikePrice= Double.parseDouble(String.valueOf(map.get("strikePrice")));
 // note To change the value
-        Double bnCurrentValue= new NSEBankNiftyFetcher().getBnCurrentValue();
-//        Double bnCurrentValue= decimalFormat.parse((String) map.get("underlyingValue")).doubleValue();
+//        Double bnCurrentValue= new NSEBankNiftyFetcher().getBnCurrentValue();
+        Double bnCurrentValue= decimalFormat.parse((String) map.get("underlyingValue")).doubleValue();
 //        Double bnCurrentValue= new MCBNODFetcher().getBnCurrentValue();
         if(indexName.contains("bn")) {
 
             if (currentStockName.contains("CE") && (currentStockStrikePrice - bnCurrentValue > 0) && (currentStockStrikePrice - bnCurrentValue < 100)) {
                 putData(json, otmIndexName);
-                putDataRatioIndex(listPETemp, changeOI, otmRationINdexName);
+//                putDataRatioIndex(listPETemp, changeOI, otmRationINdexName);
             } else if (currentStockName.contains("PE") && (currentStockStrikePrice - bnCurrentValue > -100) && (currentStockStrikePrice - bnCurrentValue < 0)) {
                 putData(json, otmIndexName);
                 listPETemp.add(changeOI);
@@ -306,7 +306,7 @@ if(indexName.contains("bn")) {
         }else{
             if (currentStockName.contains("CE") && (currentStockStrikePrice - bnCurrentValue > 0) && (currentStockStrikePrice - bnCurrentValue < 50)) {
                 putData(json, otmIndexName);
-                putDataRatioIndex(listPETemp, changeOI, otmRationINdexName);
+//                putDataRatioIndex(listPETemp, changeOI, otmRationINdexName);
             } else if (currentStockName.contains("PE") && (currentStockStrikePrice - bnCurrentValue > -50) && (currentStockStrikePrice - bnCurrentValue < 0)) {
                 putData(json, otmIndexName);
                 listPETemp.add(changeOI);
