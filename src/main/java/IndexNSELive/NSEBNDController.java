@@ -58,6 +58,7 @@ public class NSEBNDController {
         }
 
         Double bnCurrentValue=new DecimalFormat().parse(ParseJSON.getBnCurrentValue()).doubleValue();
+        new ElasticSearchUtil().clearElastChartData("bnbarchart");
 
             for (String key : map.keySet()) {
                 if (!key.contains("null")) {
@@ -68,8 +69,8 @@ public class NSEBNDController {
                     Double strikePriceValue = new DecimalFormat().parse(internalMap.get("strikePrice")).doubleValue();
 //                    Double bnCurrentVal=new NSEBankNiftyFetcher().getBnCurrentValue();
 //                    if((strikePriceValue-bnCurrentValue>=-1900)&&(strikePriceValue-bnCurrentValue<=1900))
-                    if ((bnCurrentValue - strikePriceValue >= -1000) && (bnCurrentValue - strikePriceValue <= 1000)) {
-                        new ElasticSearchUtil().storeDataElasticSearchNSEBN(key, internalMap, "bnnseoidata", "bnotm", "bnotmratio");
+                    if ((bnCurrentValue - strikePriceValue >= -1200) && (bnCurrentValue - strikePriceValue <= 1200)) {
+                        new ElasticSearchUtil().storeDataElasticSearchNSEBN(key, internalMap, "bnnseoidata", "bnotm", "bnotmratio","bnbarchart");
 
 
                         Map valueMap = map.get(key);
@@ -105,7 +106,7 @@ public class NSEBNDController {
 //Thread.sleep(sleepTime*1000);
         Map<String,Map<String,String>> map = null;
 //        Map<String, Map<String, String>> map = new NSEBankNiftyFetcher().getMappedData("https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=-10003&symbol=NIFTY&symbol=NIFTY&instrument=OPTIDX&date=-&segmentLink=17&segmentLink=17");
-        for (int i = 0; i <10 ; i++) {
+        for (int i = 0; i <20 ; i++) {
             System.out.println("Trying api call");
             Thread.sleep(1000);
             try {
@@ -130,6 +131,7 @@ public class NSEBNDController {
         double volPcr=0;
 
         DecimalFormat decimalFormat= new DecimalFormat();
+        new ElasticSearchUtil().clearElastChartData("niftybarchart");
         for (String key : map.keySet()) {
             if(!key.contains("null")) {
                 Map<String, String> internalMap = map.get(key);
@@ -138,10 +140,10 @@ public class NSEBNDController {
 
                 Double strikePriceValue = new DecimalFormat().parse(internalMap.get("strikePrice")).doubleValue();
                 // Logic to control range of data
-                if ((bnCurrentValue - strikePriceValue > -600) && (bnCurrentValue - strikePriceValue < 600)) {
+                if ((bnCurrentValue - strikePriceValue > -500) && (bnCurrentValue - strikePriceValue < 500)) {
 //                    Double bnCurrentVal=new NSEBankNiftyFetcher().getBnCurrentValue();
 //                    if((strikePriceValue-bnCurrentValue>=-1900)&&(strikePriceValue-bnCurrentValue<=1900))
-                    new ElasticSearchUtil().storeDataESNifty(key, internalMap, "niftyoidata", "niftyotm", "niftyotmratio");
+                    new ElasticSearchUtil().storeDataESNifty(key, internalMap, "niftyoidata", "niftyotm", "niftyotmratio","niftybarchart");
 
                     Map valueMap = map.get(key);
 

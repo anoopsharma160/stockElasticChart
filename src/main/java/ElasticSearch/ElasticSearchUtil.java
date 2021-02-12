@@ -136,7 +136,7 @@ catch (ParseException e){
     }
 
 
-    public void storeDataElasticSearchNSEBN(String key,Map map, String indexName,String otmIndexName,String otmRationINdexName ) throws ParseException, IOException {
+    public void storeDataElasticSearchNSEBN(String key,Map map, String indexName,String otmIndexName,String otmRationINdexName, String bnBarCharIndex ) throws ParseException, IOException {
 
         map.put("Stock",key);
             DecimalFormat decimalFormat = new DecimalFormat();
@@ -198,6 +198,9 @@ Double randomDoubleValue=Double.valueOf(randomValue);
             String json=new ObjectMapper().writeValueAsString(map);
 
             putData(json, indexName);
+// Adding data to bat chart index
+
+        putData(json,bnBarCharIndex);
 // Adding data to another index OTM data
         String currentStockName= (String) map.get("Stock");
         Double currentStockStrikePrice= Double.parseDouble(String.valueOf(map.get("strikePrice")));
@@ -225,7 +228,7 @@ if(indexName.contains("bn")) {
 
     }
 
-    public void storeDataESNifty(String key,Map map, String indexName,String otmIndexName,String otmRationINdexName ) throws ParseException, IOException {
+    public void storeDataESNifty(String key,Map map, String indexName,String otmIndexName,String otmRationINdexName, String barChartIndex ) throws ParseException, IOException {
 
         map.put("Stock",key);
         DecimalFormat decimalFormat = new DecimalFormat();
@@ -287,6 +290,9 @@ if(indexName.contains("bn")) {
         String json=new ObjectMapper().writeValueAsString(map);
 
         putData(json, indexName);
+// adding data to barChartIndex
+//        clearElastChartData(barChartIndex);
+        putData(json, barChartIndex);
 // Adding data to another index OTM data
         String currentStockName= (String) map.get("Stock");
         Double currentStockStrikePrice= Double.parseDouble(String.valueOf(map.get("strikePrice")));
@@ -366,7 +372,7 @@ if(indexName.contains("bn")) {
 
     public static void main(String[] args) throws IOException {
 //        new ElasticSearchUtil().clearElastChartData("incpriincoitop");
-        Response response = new ElasticSearchUtil().importSavedObject("src/main/resources/elasticSearchBackup/export.ndjson");
+//        Response response = new ElasticSearchUtil().importSavedObject("src/main/resources/elasticSearchBackup/export.ndjson");
     try {
 
         new ElasticSearchUtil().clearElastChartData("bnnseoidata");
@@ -385,6 +391,9 @@ if(indexName.contains("bn")) {
 
         new ElasticSearchUtil().clearElastChartData("niftypcrindex");
         new ElasticSearchUtil().clearElastChartData("bnpcrindex");
+
+        new ElasticSearchUtil().clearElastChartData("niftyBarChart");
+        new ElasticSearchUtil().clearElastChartData("bnBarChart");
 
     }
     catch (Exception e){
@@ -441,6 +450,14 @@ if(indexName.contains("bn")) {
         Response incPriIncOiIndex= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
                 .put("http://localhost:9200/incpriincoitop5");
         System.out.println(incPriIncOiIndex.prettyPrint());
+
+        Response niftyBarChartIndex= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+                .put("http://localhost:9200/niftybarchart");
+        System.out.println(niftyBarChartIndex.prettyPrint());
+
+        Response bnBarChartIndex= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+                .put("http://localhost:9200/bnbarchart");
+        System.out.println(bnBarChartIndex.prettyPrint());
 
         Response niftyPcrIndex= RestAssured.given().contentType("application/json").body("{\n" +
                 "  \"mappings\": {\n" +
