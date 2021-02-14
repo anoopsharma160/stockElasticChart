@@ -47,8 +47,8 @@ public class NSEBNDController {
         Map<String,Map<String,String>> map = null;
 //        Map<String, Map<String, String>> map = new NSEBankNiftyFetcher().getMappedData("https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=-10003&symbol=NIFTY&symbol=NIFTY&instrument=OPTIDX&date=-&segmentLink=17&segmentLink=17");
         for (int i = 0; i <20 ; i++) {
-            System.out.println("Trying api call");
-            Thread.sleep(1000);
+            System.out.println("Trying api call: "+i);
+            Thread.sleep(2000);
             try {
                 map = ParseJSON.getMap("https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY");
                 break;
@@ -58,7 +58,7 @@ public class NSEBNDController {
         }
 
         Double bnCurrentValue=new DecimalFormat().parse(ParseJSON.getBnCurrentValue()).doubleValue();
-        new ElasticSearchUtil().clearElastChartData("bnbarchart");
+        new ElasticSearchUtil().clearIndexData("bnbarchart");
 
             for (String key : map.keySet()) {
                 if (!key.contains("null")) {
@@ -69,7 +69,7 @@ public class NSEBNDController {
                     Double strikePriceValue = new DecimalFormat().parse(internalMap.get("strikePrice")).doubleValue();
 //                    Double bnCurrentVal=new NSEBankNiftyFetcher().getBnCurrentValue();
 //                    if((strikePriceValue-bnCurrentValue>=-1900)&&(strikePriceValue-bnCurrentValue<=1900))
-                    if ((bnCurrentValue - strikePriceValue >= -1200) && (bnCurrentValue - strikePriceValue <= 1200)) {
+                    if ((bnCurrentValue - strikePriceValue >= -1500) && (bnCurrentValue - strikePriceValue <= 1500)) {
                         new ElasticSearchUtil().storeDataElasticSearchNSEBN(key, internalMap, "bnnseoidata", "bnotm", "bnotmratio","bnbarchart");
 
 
@@ -131,7 +131,7 @@ public class NSEBNDController {
         double volPcr=0;
 
         DecimalFormat decimalFormat= new DecimalFormat();
-        new ElasticSearchUtil().clearElastChartData("niftybarchart");
+        new ElasticSearchUtil().clearIndexData("niftybarchart");
         for (String key : map.keySet()) {
             if(!key.contains("null")) {
                 Map<String, String> internalMap = map.get(key);

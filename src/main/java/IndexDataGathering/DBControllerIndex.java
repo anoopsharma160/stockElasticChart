@@ -53,7 +53,7 @@ Thread.sleep(sleepTime*1000);
             new ChartControllerIndex().clearCollection(db);
 
 
-    new ElasticSearchUtil().clearElastChartData("indexoption");
+    new ElasticSearchUtil().clearIndexData("indexoption");
 
 
 // 3 Create second Collection with last 3 data points

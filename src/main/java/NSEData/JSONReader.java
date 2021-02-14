@@ -45,7 +45,7 @@ Thread.sleep(sleepTime*1000);
             new NseChartController().clearCollection(db);
 
             try{
-                new ElasticSearchUtil().clearElastChartData("nseindex");
+                new ElasticSearchUtil().clearIndexData("nseindex");
             }
             catch (Exception e){
                 System.out.println("Elastic Search Index Creation Exception occured");

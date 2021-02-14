@@ -4,8 +4,10 @@ import IndexNSELive.MCBNODFetcher;
 import IndexNSELive.NSEBankNiftyFetcher;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.apache.http.HttpHost;
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
@@ -291,7 +293,7 @@ if(indexName.contains("bn")) {
 
         putData(json, indexName);
 // adding data to barChartIndex
-//        clearElastChartData(barChartIndex);
+//        deleteIndex(barChartIndex);
         putData(json, barChartIndex);
 // Adding data to another index OTM data
         String currentStockName= (String) map.get("Stock");
@@ -345,8 +347,21 @@ if(indexName.contains("bn")) {
         }
     }
 
+    public void clearIndexData(String indexName) throws IOException, InterruptedException {
+        Thread.sleep(2000);
+        String query ="{\n" +
+                " \"query\": {\n" +
+                " \"match_all\": {}\n" +
+                " }\n" +
+                "}";
+        Response response = RestAssured.given().log().all().body(query).contentType(ContentType.JSON).post("http://localhost:9200/"+indexName+"/_delete_by_query?conflicts=proceed");
+        System.out.println(response.prettyPrint());
 
-    public void clearElastChartData(String indexName) throws IOException {
+
+    }
+
+    public void deleteIndex(String indexName) throws IOException, InterruptedException {
+        Thread.sleep(2000);
         RestHighLevelClient client = new RestHighLevelClient(RestClient.builder(
                 new HttpHost("localhost", 9200, "http"),
                 new HttpHost("localhost", 9201, "http")
@@ -358,9 +373,25 @@ if(indexName.contains("bn")) {
         client.close();
 
     }
+
+    public void addIndex(String indexName) throws IOException, InterruptedException {
+        Thread.sleep(2000);
+        RestHighLevelClient client = new RestHighLevelClient(RestClient.builder(
+                new HttpHost("localhost", 9200, "http"),
+                new HttpHost("localhost", 9201, "http")
+        ));
+
+        //Clear the elastic Search Index first
+        IndexRequest indexRequest= new IndexRequest(indexName);
+//        RequestOptions requestOptions = RequestOptions.Builder.
+//        client.indices().create();
+        client.close();
+
+    }
+
     public Response importSavedObject(String fileName){
         String host = "http://localhost:5601";
-        String apiEndPoint = "/api/saved_objects/_import";
+        String apiEndPoint = "/api/saved_objects/_import?overwrite=true";
         Response response = RestAssured.given().contentType("multipart/form-data")
                 .header("kbn-xsrf","true")
                 .multiPart("file",new File(fileName))
@@ -371,29 +402,32 @@ if(indexName.contains("bn")) {
     }
 
     public static void main(String[] args) throws IOException {
-//        new ElasticSearchUtil().clearElastChartData("incpriincoitop");
+//        new ElasticSearchUtil().deleteIndex("incpriincoitop");
 //        Response response = new ElasticSearchUtil().importSavedObject("src/main/resources/elasticSearchBackup/export.ndjson");
+//        System.out.println("Import data Response : "+response.getStatusLine());
+//        System.out.println("Import data Response : "+response.getStatusCode());
+//        System.out.println("API Respoonse : "+response.prettyPrint());
     try {
 
-        new ElasticSearchUtil().clearElastChartData("bnnseoidata");
-        new ElasticSearchUtil().clearElastChartData("bnotm");
-        new ElasticSearchUtil().clearElastChartData("bnotmratio");
-        new ElasticSearchUtil().clearElastChartData("bnotmratioall");
+        new ElasticSearchUtil().deleteIndex("bnnseoidata");
+        new ElasticSearchUtil().deleteIndex("bnotm");
+        new ElasticSearchUtil().deleteIndex("bnotmratio");
+        new ElasticSearchUtil().deleteIndex("bnotmratioall");
 //
-        new ElasticSearchUtil().clearElastChartData("niftyoidata");
-        new ElasticSearchUtil().clearElastChartData("niftyotm");
-        new ElasticSearchUtil().clearElastChartData("niftyotmratio");
-        new ElasticSearchUtil().clearElastChartData("niftyotmratioall");
+        new ElasticSearchUtil().deleteIndex("niftyoidata");
+        new ElasticSearchUtil().deleteIndex("niftyotm");
+        new ElasticSearchUtil().deleteIndex("niftyotmratio");
+        new ElasticSearchUtil().deleteIndex("niftyotmratioall");
 //
-        new ElasticSearchUtil().clearElastChartData("incpriincoitop5");
+        new ElasticSearchUtil().deleteIndex("incpriincoitop5");
 
-        new ElasticSearchUtil().clearElastChartData("bn_oi_history");
+        new ElasticSearchUtil().deleteIndex("bn_oi_history");
 
-        new ElasticSearchUtil().clearElastChartData("niftypcrindex");
-        new ElasticSearchUtil().clearElastChartData("bnpcrindex");
+        new ElasticSearchUtil().deleteIndex("niftypcrindex");
+        new ElasticSearchUtil().deleteIndex("bnpcrindex");
 
-        new ElasticSearchUtil().clearElastChartData("niftyBarChart");
-        new ElasticSearchUtil().clearElastChartData("bnBarChart");
+        new ElasticSearchUtil().deleteIndex("niftyBarChart");
+        new ElasticSearchUtil().deleteIndex("bnBarChart");
 
     }
     catch (Exception e){

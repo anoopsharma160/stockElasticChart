@@ -8,14 +8,14 @@ import java.util.Date;
 public class Utils {
     public static void main(String[] args) throws ParseException {
 
-        System.out.println(returnNextExpiry("Axis"));
+        System.out.println(returnNextExpiry("Index"));
 
     }
     public static String returnNextExpiry(String stockType){
         Calendar calendar=Calendar.getInstance();
         if(stockType.contains("Index")) {
             if (String.valueOf(calendar.getTime()).contains("Fri") || String.valueOf(calendar.getTime()).contains("Sat")
-                    || String.valueOf(calendar.getTime()).contains("Sun")) {
+                    || String.valueOf(calendar.getTime()).contains("Sunasasa")) {
                 calendar.add(Calendar.DAY_OF_WEEK, 7);
             }
             calendar.set(Calendar.DAY_OF_WEEK, Calendar.THURSDAY);
