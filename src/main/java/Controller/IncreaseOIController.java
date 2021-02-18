@@ -32,7 +32,7 @@ new JSONReader().execute(id);
         new DBControllerIndex().execute(id);
     }
     @RequestMapping(value = "/nsebnoi",method = RequestMethod.GET)
-    void nsebnoidata() throws InterruptedException, ParseException, IOException {
+    void nsebnoidata() throws Exception {
         new NSEBNDController().execute(0);
     }
 

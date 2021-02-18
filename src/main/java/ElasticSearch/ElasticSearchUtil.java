@@ -402,32 +402,25 @@ if(indexName.contains("bn")) {
     }
 
     public static void main(String[] args) throws IOException {
+        String []index_list = {"bnnseoidata","bnotm","bnotmratio","bnotmratioall","niftyoidata","niftyotm","niftyotmratio"
+        ,"niftyotmratioall","incpriincoitop5","bn_oi_history","niftypcrindex","bnpcrindex","niftybarchart","bnbarchart"};
 //        new ElasticSearchUtil().deleteIndex("incpriincoitop");
 //        Response response = new ElasticSearchUtil().importSavedObject("src/main/resources/elasticSearchBackup/export.ndjson");
 //        System.out.println("Import data Response : "+response.getStatusLine());
 //        System.out.println("Import data Response : "+response.getStatusCode());
 //        System.out.println("API Respoonse : "+response.prettyPrint());
+        ElasticSearchUtil elasticSearchUtil = new ElasticSearchUtil();
     try {
+        for (int i = 0; i <index_list.length ; i++) {
+            System.out.println("Clearing data for index : "+index_list[i]);
+            elasticSearchUtil.clearIndexData(index_list[i]);
+        }
 
-        new ElasticSearchUtil().deleteIndex("bnnseoidata");
-        new ElasticSearchUtil().deleteIndex("bnotm");
-        new ElasticSearchUtil().deleteIndex("bnotmratio");
-        new ElasticSearchUtil().deleteIndex("bnotmratioall");
-//
-        new ElasticSearchUtil().deleteIndex("niftyoidata");
-        new ElasticSearchUtil().deleteIndex("niftyotm");
-        new ElasticSearchUtil().deleteIndex("niftyotmratio");
-        new ElasticSearchUtil().deleteIndex("niftyotmratioall");
-//
-        new ElasticSearchUtil().deleteIndex("incpriincoitop5");
-
-        new ElasticSearchUtil().deleteIndex("bn_oi_history");
-
-        new ElasticSearchUtil().deleteIndex("niftypcrindex");
-        new ElasticSearchUtil().deleteIndex("bnpcrindex");
-
-        new ElasticSearchUtil().deleteIndex("niftyBarChart");
-        new ElasticSearchUtil().deleteIndex("bnBarChart");
+//        Deleting index
+//        for (int i = 0; i <index_list.length ; i++) {
+//            System.out.println("Clearing data for index : "+index_list[i]);
+//            elasticSearchUtil.deleteIndex(index_list[i]);
+//        }
 
     }
     catch (Exception e){
@@ -446,83 +439,83 @@ if(indexName.contains("bn")) {
 
 
         //888888*************
-        Response responseIncTop= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-        .put("http://localhost:9200/bnnseoidata");
-        System.out.println(responseIncTop.prettyPrint());
-
-        Response responseOTM= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/bnotm");
-        System.out.println(responseOTM.prettyPrint());
-
-        Response responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/bnotmratio");
-        System.out.println(responseOTMRatio.prettyPrint());
-
-        responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/bnotmratioall");
-        System.out.println(responseOTMRatio.prettyPrint());
-
-        responseIncTop= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/niftyoidata");
-        System.out.println(responseIncTop.prettyPrint());
-
-        responseOTM= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/niftyotm");
-        System.out.println(responseOTM.prettyPrint());
-
-        responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/niftyotmratio");
-        System.out.println(responseOTMRatio.prettyPrint());
-
-        responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/niftyotmratioall");
-        System.out.println(responseOTMRatio.prettyPrint());
-
-        Response responseBNOIHistory= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/bn_oi_history");
-        System.out.println(responseBNOIHistory.prettyPrint());
-        Response incPriIncOiIndex= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/incpriincoitop5");
-        System.out.println(incPriIncOiIndex.prettyPrint());
-
-        Response niftyBarChartIndex= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/niftybarchart");
-        System.out.println(niftyBarChartIndex.prettyPrint());
-
-        Response bnBarChartIndex= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/bnbarchart");
-        System.out.println(bnBarChartIndex.prettyPrint());
-
-        Response niftyPcrIndex= RestAssured.given().contentType("application/json").body("{\n" +
-                "  \"mappings\": {\n" +
-                "    \"properties\": {\n" +
-                "      \"timestamp\": {\n" +
-                "        \"type\": \"date\"\n" +
-                "      },\n" +
-                "      \"publisher\": {\n" +
-                "          \"type\": \"text\",\n" +
-                "          \"fielddata\": true\n" +
-                "        }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}")
-                .put("http://localhost:9200/niftypcrindex");
-        System.out.println(niftyPcrIndex.prettyPrint());
-
-        Response bnPcrIndex= RestAssured.given().contentType("application/json").body("{\n" +
-                "  \"mappings\": {\n" +
-                "    \"properties\": {\n" +
-                "      \"timestamp\": {\n" +
-                "        \"type\": \"date\"\n" +
-                "      },\n" +
-                "      \"publisher\": {\n" +
-                "          \"type\": \"text\",\n" +
-                "          \"fielddata\": true\n" +
-                "        }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}")
-                .put("http://localhost:9200/bnpcrindex");
-        System.out.println(bnPcrIndex.prettyPrint());
+//        Response responseIncTop= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+//        .put("http://localhost:9200/bnnseoidata");
+//        System.out.println(responseIncTop.prettyPrint());
+//
+//        Response responseOTM= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+//                .put("http://localhost:9200/bnotm");
+//        System.out.println(responseOTM.prettyPrint());
+//
+//        Response responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+//                .put("http://localhost:9200/bnotmratio");
+//        System.out.println(responseOTMRatio.prettyPrint());
+//
+//        responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+//                .put("http://localhost:9200/bnotmratioall");R
+//        System.out.println(responseOTMRatio.prettyPrint());
+//
+//        responseIncTop= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+//                .put("http://localhost:9200/niftyoidata");
+//        System.out.println(responseIncTop.prettyPrint());
+//
+//        responseOTM= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+//                .put("http://localhost:9200/niftyotm");
+//        System.out.println(responseOTM.prettyPrint());
+//
+//        responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+//                .put("http://localhost:9200/niftyotmratio");
+//        System.out.println(responseOTMRatio.prettyPrint());
+//
+//        responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+//                .put("http://localhost:9200/niftyotmratioall");
+//        System.out.println(responseOTMRatio.prettyPrint());
+//
+//        Response responseBNOIHistory= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+//                .put("http://localhost:9200/bn_oi_history");
+//        System.out.println(responseBNOIHistory.prettyPrint());
+//        Response incPriIncOiIndex= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+//                .put("http://localhost:9200/incpriincoitop5");
+//        System.out.println(incPriIncOiIndex.prettyPrint());
+//
+//        Response niftyBarChartIndex= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+//                .put("http://localhost:9200/niftybarchart");
+//        System.out.println(niftyBarChartIndex.prettyPrint());
+//
+//        Response bnBarChartIndex= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+//                .put("http://localhost:9200/bnbarchart");
+//        System.out.println(bnBarChartIndex.prettyPrint());
+//
+//        Response niftyPcrIndex= RestAssured.given().contentType("application/json").body("{\n" +
+//                "  \"mappings\": {\n" +
+//                "    \"properties\": {\n" +
+//                "      \"timestamp\": {\n" +
+//                "        \"type\": \"date\"\n" +
+//                "      },\n" +
+//                "      \"publisher\": {\n" +
+//                "          \"type\": \"text\",\n" +
+//                "          \"fielddata\": true\n" +
+//                "        }\n" +
+//                "    }\n" +
+//                "  }\n" +
+//                "}")
+//                .put("http://localhost:9200/niftypcrindex");
+//        System.out.println(niftyPcrIndex.prettyPrint());
+//
+//        Response bnPcrIndex= RestAssured.given().contentType("application/json").body("{\n" +
+//                "  \"mappings\": {\n" +
+//                "    \"properties\": {\n" +
+//                "      \"timestamp\": {\n" +
+//                "        \"type\": \"date\"\n" +
+//                "      },\n" +
+//                "      \"publisher\": {\n" +
+//                "          \"type\": \"text\",\n" +
+//                "          \"fielddata\": true\n" +
+//                "        }\n" +
+//                "    }\n" +
+//                "  }\n" +
+//                "}")
+//                .put("http://localhost:9200/bnpcrindex");
+//        System.out.println(bnPcrIndex.prettyPrint());
     }
 }

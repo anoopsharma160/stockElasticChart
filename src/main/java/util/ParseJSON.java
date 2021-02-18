@@ -42,7 +42,7 @@ public class ParseJSON {
 //        headers.put("sec-fetch-site","same-origin");
 //
 //        System.setProperty("javax.net.ssl.trustStore", "/Users/anoop.sharma/Downloads/GeoTrustRSACA2018.crt");
-        Document document= Jsoup.connect(url).ignoreContentType(true)
+        Document document= Jsoup.connect(url).ignoreContentType(true).timeout(20000).maxBodySize(2048000)
                 .userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36").get();
 //        System.out.println(document.text());
         JSONObject jsonObject = new JSONObject(document.text());

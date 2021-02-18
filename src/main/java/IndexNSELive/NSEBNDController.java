@@ -9,6 +9,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import org.apache.commons.exec.ExecuteException;
 import org.bson.Document;
 import util.ParseJSON;
 
@@ -24,7 +25,7 @@ public class NSEBNDController {
 //        new NSEBNDController().execute(0);
     }
 
-    public void execute(int sleepTime) throws IOException, InterruptedException, ParseException {
+    public void execute(int sleepTime) throws Exception {
 //Thread.sleep(sleepTime*1000);
 
         double oiCE = 0;
@@ -46,15 +47,21 @@ public class NSEBNDController {
 //        Double bnCurrentValue=new NSEBankNiftyFetcher().getBnCurrentValue();
         Map<String,Map<String,String>> map = null;
 //        Map<String, Map<String, String>> map = new NSEBankNiftyFetcher().getMappedData("https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=-10003&symbol=NIFTY&symbol=NIFTY&instrument=OPTIDX&date=-&segmentLink=17&segmentLink=17");
-        for (int i = 0; i <20 ; i++) {
-            System.out.println("Trying api call: "+i);
-            Thread.sleep(2000);
-            try {
-                map = ParseJSON.getMap("https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY");
-                break;
-            }catch (Exception e){
-                System.out.println("API Call failed!! "+e.toString());
+        try {
+            for (int i = 0; i < 20; i++) {
+                System.out.println("Trying api call: " + i);
+                Thread.sleep(2000);
+                try {
+                    map = ParseJSON.getMap("https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY");
+                    break;
+                } catch (Exception e) {
+                    System.out.println("API Call failed!! " + e.toString());
+                }
             }
+        }
+        catch (Exception e) {
+            System.out.println("After all api call Throwing exception Manually");
+            throw  new Exception("Manually throw exceptions here");
         }
 
         Double bnCurrentValue=new DecimalFormat().parse(ParseJSON.getBnCurrentValue()).doubleValue();
@@ -102,19 +109,26 @@ public class NSEBNDController {
         new ElasticSearchUtil().putData(new ObjectMapper().writeValueAsString(pcrMap),"bnpcrindex");
 
         }
-    public void executeNifty(int sleepTime) throws IOException, InterruptedException, ParseException {
+    public void executeNifty(int sleepTime) throws Exception {
 //Thread.sleep(sleepTime*1000);
         Map<String,Map<String,String>> map = null;
 //        Map<String, Map<String, String>> map = new NSEBankNiftyFetcher().getMappedData("https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=-10003&symbol=NIFTY&symbol=NIFTY&instrument=OPTIDX&date=-&segmentLink=17&segmentLink=17");
-        for (int i = 0; i <20 ; i++) {
-            System.out.println("Trying api call");
-            Thread.sleep(1000);
-            try {
-                map = ParseJSON.getMap("https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY");
-                break;
-            }catch (Exception e){
-                System.out.println("API Call failed!! "+e.toString());
+        try {
+            for (int i = 0; i < 20; i++) {
+                System.out.println("Trying api call: " + i);
+                Thread.sleep(1000);
+                try {
+                    map = ParseJSON.getMap("https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY");
+                    break;
+                } catch (Exception e) {
+                    System.out.println("API Call failed!! " + e.toString());
+
+                }
             }
+        }
+        catch (Exception e){
+            System.out.println("After all api call!! throwing exceptions manually");
+            throw  new Exception("Manually throw exceptions!!!!");
         }
         
 //        Double bnCurrentValue=new NSEBankNiftyFetcher().getBnCurrentValue();
