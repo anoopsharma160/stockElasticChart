@@ -324,7 +324,7 @@ if(indexName.contains("bn")) {
     }
 
     static void putDataRatioIndex(List list,double chngOICE,String indexName) throws IOException {
-        Double chngOIPE= (Double) list.get(0);
+        Double chngOIPE= (Double) list. get(0);
         if(list.size()==1){
             list.clear();
         }
@@ -507,16 +507,20 @@ if(indexName.contains("bn")) {
         }
 
 //        Deleting index
-//        for (int i = 0; i <index_list.length ; i++) {
-//            System.out.println("Clearing data for index : "+index_list[i]);
-//            elasticSearchUtil.deleteIndex(index_list[i]);
-//        }
-//        elasticSearchUtil.addIndex();
+        for (int i = 0; i <index_list.length ; i++) {
+            System.out.println("Deleting index : "+index_list[i]);
+            Thread.sleep(1000);
+            elasticSearchUtil.deleteIndex(index_list[i]);
+        }
+        elasticSearchUtil.addIndex();
+//
+
 
     }
     catch (Exception e){
         System.out.println("Exception catched!!!");
         System.out.println("Index not found in elasticsearch");
+        elasticSearchUtil.addIndex();
     }
 
 

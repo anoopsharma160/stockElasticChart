@@ -154,7 +154,7 @@ public class NSEBNDController {
 
                 Double strikePriceValue = new DecimalFormat().parse(internalMap.get("strikePrice")).doubleValue();
                 // Logic to control range of data
-                if ((bnCurrentValue - strikePriceValue > -500) && (bnCurrentValue - strikePriceValue < 500)) {
+                if ((bnCurrentValue - strikePriceValue > -800) && (bnCurrentValue - strikePriceValue < 800)) {
 //                    Double bnCurrentVal=new NSEBankNiftyFetcher().getBnCurrentValue();
 //                    if((strikePriceValue-bnCurrentValue>=-1900)&&(strikePriceValue-bnCurrentValue<=1900))
                     new ElasticSearchUtil().storeDataESNifty(key, internalMap, "niftyoidata", "niftyotm", "niftyotmratio","niftybarchart");
