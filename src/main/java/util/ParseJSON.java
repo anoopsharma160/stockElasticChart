@@ -52,8 +52,10 @@ public class ParseJSON {
         for (int i=0; i<dataJsonArray.length();i++){
             JSONObject elem= (JSONObject) dataJsonArray.get(i);
             int strikrPrice= elem.getInt("strikePrice");
+            System.out.println("Element String : " +elem);
 
             if (elem.getString("expiryDate").equalsIgnoreCase(nextExpiry)){
+
                 for (String el : elem.keySet()) {
                     Map<String, String> insideMap = new HashMap();
                     if (el.equalsIgnoreCase("CE")) {
