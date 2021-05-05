@@ -16,6 +16,7 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
 import util.LengthUtil;
+import util.PropUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,14 +28,23 @@ public class ElasticSearchUtil {
 //        static int number=0;
     static  int bnCount=0;
     static List listPETemp= new ArrayList();
+    static String elasticSearchIp;
+
+    static {
+        try {
+            elasticSearchIp = PropUtils.getPropValue("elastic.hostname");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static boolean putData(String dataJson, String indexName) throws IOException {
         RestHighLevelClient client = new RestHighLevelClient(RestClient.builder(
 //                new HttpHost("10.157.251.29", 9200, "http"),
 //                new HttpHost("10.157.251.29", 9201, "http")
 
-        new HttpHost("localhost", 9200, "http"),
-                new HttpHost("localhost", 9201, "http")
+        new HttpHost(elasticSearchIp, 9200, "http"),
+                new HttpHost(elasticSearchIp, 9201, "http")
         ));
 
 // Clear the elastic Search Index first
@@ -354,7 +364,7 @@ if(indexName.contains("bn")) {
                 " \"match_all\": {}\n" +
                 " }\n" +
                 "}";
-        Response response = RestAssured.given().log().all().body(query).contentType(ContentType.JSON).post("http://localhost:9200/"+indexName+"/_delete_by_query?conflicts=proceed");
+        Response response = RestAssured.given().log().all().body(query).contentType(ContentType.JSON).post("http://"+elasticSearchIp+":9200/"+indexName+"/_delete_by_query?conflicts=proceed");
         System.out.println(response.prettyPrint());
 
 
@@ -363,8 +373,8 @@ if(indexName.contains("bn")) {
     public void deleteIndex(String indexName) throws IOException, InterruptedException {
         Thread.sleep(2000);
         RestHighLevelClient client = new RestHighLevelClient(RestClient.builder(
-                new HttpHost("localhost", 9200, "http"),
-                new HttpHost("localhost", 9201, "http")
+                new HttpHost(elasticSearchIp, 9200, "http"),
+                new HttpHost(elasticSearchIp, 9201, "http")
         ));
 
  //Clear the elastic Search Index first
@@ -377,8 +387,8 @@ if(indexName.contains("bn")) {
     public void addIndex(String indexName) throws IOException, InterruptedException {
         Thread.sleep(2000);
         RestHighLevelClient client = new RestHighLevelClient(RestClient.builder(
-                new HttpHost("localhost", 9200, "http"),
-                new HttpHost("localhost", 9201, "http")
+                new HttpHost(elasticSearchIp, 9200, "http"),
+                new HttpHost(elasticSearchIp, 9201, "http")
         ));
 
         //Clear the elastic Search Index first
@@ -390,7 +400,7 @@ if(indexName.contains("bn")) {
     }
 
     public Response importSavedObject(String fileName){
-        String host = "http://localhost:5601";
+        String host = "http://"+elasticSearchIp+":5601";
         String apiEndPoint = "/api/saved_objects/_import?overwrite=true";
         Response response = RestAssured.given().contentType("multipart/form-data")
                 .header("kbn-xsrf","true")
@@ -404,7 +414,7 @@ if(indexName.contains("bn")) {
 
         // Adding time stamp
         Response responseBnNse= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}}")
-        .put("http://localhost:9200/incpriincoitop");
+        .put("http://"+elasticSearchIp+":9200/incpriincoitop");
         System.out.println(responseBnNse.prettyPrint());
 
 
@@ -412,50 +422,50 @@ if(indexName.contains("bn")) {
 
 
         Response responseIncTop= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-        .put("http://localhost:9200/bnnseoidata");
+        .put("http://"+elasticSearchIp+":9200/bnnseoidata");
         System.out.println(responseIncTop.prettyPrint());
 
         Response responseOTM= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/bnotm");
+                .put("http://"+elasticSearchIp+":9200/bnotm");
         System.out.println(responseOTM.prettyPrint());
 
         Response responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/bnotmratio");
+                .put("http://"+elasticSearchIp+":9200/bnotmratio");
         System.out.println(responseOTMRatio.prettyPrint());
 
         responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/bnotmratioall");
+                .put("http://"+elasticSearchIp+":9200/bnotmratioall");
         System.out.println(responseOTMRatio.prettyPrint());
 
         responseIncTop= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/niftyoidata");
+                .put("http://"+elasticSearchIp+":9200/niftyoidata");
         System.out.println(responseIncTop.prettyPrint());
 
         responseOTM= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/niftyotm");
+                .put("http://"+elasticSearchIp+":9200/niftyotm");
         System.out.println(responseOTM.prettyPrint());
 
         responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/niftyotmratio");
+                .put("http://"+elasticSearchIp+":9200/niftyotmratio");
         System.out.println(responseOTMRatio.prettyPrint());
 
         responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/niftyotmratioall");
+                .put("http://"+elasticSearchIp+":9200/niftyotmratioall");
         System.out.println(responseOTMRatio.prettyPrint());
 
         Response responseBNOIHistory= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/bn_oi_history");
+                .put("http://"+elasticSearchIp+":9200/bn_oi_history");
         System.out.println(responseBNOIHistory.prettyPrint());
         Response incPriIncOiIndex= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/incpriincoitop5");
+                .put("http://"+elasticSearchIp+":9200/incpriincoitop5");
         System.out.println(incPriIncOiIndex.prettyPrint());
 
         Response niftyBarChartIndex= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/niftybarchart");
+                .put("http://"+elasticSearchIp+":9200/niftybarchart");
         System.out.println(niftyBarChartIndex.prettyPrint());
 
         Response bnBarChartIndex= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://localhost:9200/bnbarchart");
+                .put("http://"+elasticSearchIp+":9200/bnbarchart");
         System.out.println(bnBarChartIndex.prettyPrint());
 
         Response niftyPcrIndex= RestAssured.given().contentType("application/json").body("{\n" +
@@ -471,7 +481,7 @@ if(indexName.contains("bn")) {
                 "    }\n" +
                 "  }\n" +
                 "}")
-                .put("http://localhost:9200/niftypcrindex");
+                .put("http://"+elasticSearchIp+":9200/niftypcrindex");
         System.out.println(niftyPcrIndex.prettyPrint());
 
         Response bnPcrIndex= RestAssured.given().contentType("application/json").body("{\n" +
@@ -487,7 +497,7 @@ if(indexName.contains("bn")) {
                 "    }\n" +
                 "  }\n" +
                 "}")
-                .put("http://localhost:9200/bnpcrindex");
+                .put("http://"+elasticSearchIp+":9200/bnpcrindex");
         System.out.println(bnPcrIndex.prettyPrint());
     }
 
@@ -507,13 +517,13 @@ if(indexName.contains("bn")) {
         }
 
 //        Deleting index
-//        for (int i = 0; i <index_list.length ; i++) {
-//            System.out.println("Deleting index : "+index_list[i]);
-//            Thread.sleep(1000);
-//            elasticSearchUtil.deleteIndex(index_list[i]);
-//        }
-//        elasticSearchUtil.addIndex();
-//
+        for (int i = 0; i <index_list.length ; i++) {
+            System.out.println("Deleting index : "+index_list[i]);
+            Thread.sleep(1000);
+            elasticSearchUtil.deleteIndex(index_list[i]);
+        }
+        elasticSearchUtil.addIndex();
+//8
 
 
     }

@@ -98,6 +98,13 @@ public class NSEBNDController {
         oiPcr=oiPE/oiCE;
         chgOiPcr=chgOiPE/chgOiCE;
         volPcr=volPE/volCE;
+        if (Double.isNaN(oiPcr))
+            oiPcr =0.0;
+        if (Double.isNaN(chgOiPcr))
+            chgOiPcr = 0.0;
+        if(Double.isNaN(volPcr))
+            volPcr =0.0;
+
         //Construct map
         Map pcrMap= new HashMap();
         pcrMap.put("BN Current",bnCurrentValue);
@@ -179,6 +186,14 @@ public class NSEBNDController {
         oiPcr=oiPE/oiCE;
         chgOiPcr=chgOiPE/chgOiCE;
         volPcr=volPE/volCE;
+
+        if (Double.isNaN(oiPcr))
+            oiPcr =0.0;
+        if (Double.isNaN(chgOiPcr))
+            chgOiPcr = 0.0;
+        if(Double.isNaN(volPcr))
+            volPcr =0.0;
+
         //Construct map
         Map pcrMap= new HashMap();
         pcrMap.put("Nifty Current",bnCurrentValue);

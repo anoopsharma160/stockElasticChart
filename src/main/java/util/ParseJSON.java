@@ -46,6 +46,7 @@ public class ParseJSON {
                 .userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36").get();
 //        System.out.println(document.text());
         JSONObject jsonObject = new JSONObject(document.text());
+//        bnCurrentValue = String.valueOf(jsonObject.getJSONObject("records").getJSONObject("index").get("last"));
 
         JSONArray dataJsonArray= jsonObject.getJSONObject("filtered").getJSONArray("data");
         Map<String,Map> map = new HashMap<>();
