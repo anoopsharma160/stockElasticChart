@@ -511,18 +511,19 @@ if(indexName.contains("bn")) {
 //        System.out.println("API Respoonse : "+response.prettyPrint());
         ElasticSearchUtil elasticSearchUtil = new ElasticSearchUtil();
     try {
+
         for (int i = 0; i <index_list.length ; i++) {
             System.out.println("Clearing data for index : "+index_list[i]);
             elasticSearchUtil.clearIndexData(index_list[i]);
         }
 
 //        Deleting index
-        for (int i = 0; i <index_list.length ; i++) {
-            System.out.println("Deleting index : "+index_list[i]);
-            Thread.sleep(1000);
-            elasticSearchUtil.deleteIndex(index_list[i]);
-        }
-        elasticSearchUtil.addIndex();
+//        for (int i = 0; i <index_list.length ; i++) {
+//            System.out.println("Deleting index : "+index_list[i]);
+//            Thread.sleep(1000);
+//            elasticSearchUtil.deleteIndex(index_list[i]);
+//        }
+//        elasticSearchUtil.addIndex();
 //8
 
 
