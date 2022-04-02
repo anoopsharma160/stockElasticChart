@@ -5,14 +5,21 @@ import IndexNSELive.NSEBankNiftyFetcher;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.http.Header;
 import io.restassured.response.Response;
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
 import util.LengthUtil;
@@ -25,27 +32,46 @@ import java.text.ParseException;
 import java.util.*;
 
 public class ElasticSearchUtil {
-//        static int number=0;
+    //        static int number=0;
     static  int bnCount=0;
     static List listPETemp= new ArrayList();
     static String elasticSearchIp;
+    static String elasticPassword;
+    static String elasticHttpHostname;
 
     static {
         try {
             elasticSearchIp = PropUtils.getPropValue("elastic.hostname");
+            elasticPassword = PropUtils.getPropValue("elastic.password");
+            elasticHttpHostname = PropUtils.getPropValue("elastic.http.hostname");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public static boolean putData(String dataJson, String indexName) throws IOException {
+//        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+//        credentialsProvider.setCredentials(AuthScope.ANY,
+//                new UsernamePasswordCredentials("elastic", elasticPassword));
+//
+//        RestClientBuilder builder = RestClient.builder(new HttpHost(elasticSearchIp, 9200,"http"))
+//                .setHttpClientConfigCallback(new RestClientBuilder.HttpClientConfigCallback() {
+//                    @Override
+//                    public HttpAsyncClientBuilder customizeHttpClient(HttpAsyncClientBuilder httpClientBuilder) {
+//                        return httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+//                    }
+//                });
+//
+//        RestHighLevelClient client = new RestHighLevelClient(builder);
+
         RestHighLevelClient client = new RestHighLevelClient(RestClient.builder(
 //                new HttpHost("10.157.251.29", 9200, "http"),
 //                new HttpHost("10.157.251.29", 9201, "http")
 
-        new HttpHost(elasticSearchIp, 9200, "http"),
+                new HttpHost(elasticSearchIp, 9200, "http"),
                 new HttpHost(elasticSearchIp, 9201, "http")
         ));
+
 
 // Clear the elastic Search Index first
 //        DeleteIndexRequest deleteIndexRequest= new DeleteIndexRequest("nseindex");
@@ -62,45 +88,47 @@ public class ElasticSearchUtil {
 //                "\"message\":\"trying out Elasticsearch\"" +
 //                "}";
         request.source(dataJson, XContentType.JSON);
-        IndexResponse indexResponse = client.index(request, RequestOptions.DEFAULT);
+        IndexResponse indexResponse = client.index(request, RequestOptions.DEFAULT)  ;
         client.close();
 //        System.out.println("ES : Doc Creation "+indexResponse);
         return indexResponse.status().getStatus()==201;
 
+
+
     }
 
-// store the json string data to double data
-public void storeDataElasticSearch(Map map, String indexName ) throws ParseException, IOException {
-    if(!map.get("Symbol").toString().contains("null")) {
-        DecimalFormat decimalFormat = (DecimalFormat) DecimalFormat.getInstance();
-        double oiChgPerc = decimalFormat.parse((String) map.get("Chg %")).doubleValue();
-        double priceChg = decimalFormat.parse((String) map.get("Chg Rs")).doubleValue();
-        double volChgPerc;
-        try {
-    volChgPerc = decimalFormat.parse((String) map.get("% Change")).doubleValue();
-}
-catch (ParseException e){
-    volChgPerc=0.0;
-}
-        map.remove("Chg %");
-        map.remove("Chg Rs");
-        map.remove("% Change");
+    // store the json string data to double data
+    public void storeDataElasticSearch(Map map, String indexName ) throws ParseException, IOException {
+        if(!map.get("Symbol").toString().contains("null")) {
+            DecimalFormat decimalFormat = (DecimalFormat) DecimalFormat.getInstance();
+            double oiChgPerc = decimalFormat.parse((String) map.get("Chg %")).doubleValue();
+            double priceChg = decimalFormat.parse((String) map.get("Chg Rs")).doubleValue();
+            double volChgPerc;
+            try {
+                volChgPerc = decimalFormat.parse((String) map.get("% Change")).doubleValue();
+            }
+            catch (ParseException e){
+                volChgPerc=0.0;
+            }
+            map.remove("Chg %");
+            map.remove("Chg Rs");
+            map.remove("% Change");
 
-        map.put("Price CHG", priceChg);
-        if(oiChgPerc>100){
-            oiChgPerc=100+oiChgPerc%100;
-        }
-        if(volChgPerc>100){
-            volChgPerc=100+volChgPerc%100;
-        }
-        map.put("OI CHG %", oiChgPerc);
-        map.put("VOL CHG %", volChgPerc);
-        map.put("timestamp",System.currentTimeMillis());
+            map.put("Price CHG", priceChg);
+            if(oiChgPerc>100){
+                oiChgPerc=100+oiChgPerc%100;
+            }
+            if(volChgPerc>100){
+                volChgPerc=100+volChgPerc%100;
+            }
+            map.put("OI CHG %", oiChgPerc);
+            map.put("VOL CHG %", volChgPerc);
+            map.put("timestamp",System.currentTimeMillis());
 
-        String json=new ObjectMapper().writeValueAsString(map);
-        putData(json, indexName);
+            String json=new ObjectMapper().writeValueAsString(map);
+            putData(json, indexName);
+        }
     }
-}
 
 // store the es data for top 5 increase in oi and increase in price
 
@@ -151,37 +179,37 @@ catch (ParseException e){
     public void storeDataElasticSearchNSEBN(String key,Map map, String indexName,String otmIndexName,String otmRationINdexName, String bnBarCharIndex ) throws ParseException, IOException {
 
         map.put("Stock",key);
-            DecimalFormat decimalFormat = new DecimalFormat();
+        DecimalFormat decimalFormat = new DecimalFormat();
         double priceLTP ;
         double currentOI ;
         double changeOI;
         double vol;
-            try {
-                priceLTP = decimalFormat.parse((String) map.get("lastPrice")).doubleValue();
-                currentOI = decimalFormat.parse((String) map.get("openInterest")).doubleValue();
+        try {
+            priceLTP = decimalFormat.parse((String) map.get("lastPrice")).doubleValue();
+            currentOI = decimalFormat.parse((String) map.get("openInterest")).doubleValue();
 // Random Long values to change the oi for testing
-String randomValue= String.valueOf(new Random().nextLong()).substring(0,3);
-Double randomDoubleValue=Double.valueOf(randomValue);
-                 changeOI = decimalFormat.parse((String) map.get("changeinOpenInterest")).doubleValue();
-                 vol = decimalFormat.parse((String) map.get("totalTradedVolume")).doubleValue();
-            }
-            catch (ParseException e){
-                priceLTP=0.0;
-                currentOI=0.0;
-                changeOI=0.0;
-                vol=0.0;
-            }
+            String randomValue= String.valueOf(new Random().nextLong()).substring(0,3);
+            Double randomDoubleValue=Double.valueOf(randomValue);
+            changeOI = decimalFormat.parse((String) map.get("changeinOpenInterest")).doubleValue();
+            vol = decimalFormat.parse((String) map.get("totalTradedVolume")).doubleValue();
+        }
+        catch (ParseException e){
+            priceLTP=0.0;
+            currentOI=0.0;
+            changeOI=0.0;
+            vol=0.0;
+        }
 
-            map.put("LTP",priceLTP);
-            map.put("OI",currentOI);
+        map.put("LTP",priceLTP);
+        map.put("OI",currentOI);
 
 //            if(bnCount++<15){
 //                map.put("Chng in OI", changeOI);
 //            }
 //            else
-            map.put("Chng in OI", changeOI);
+        map.put("Chng in OI", changeOI);
 
-            map.put("Volume",vol);
+        map.put("Volume",vol);
 // Adding the Average of LTP+CHG in OI +Volume
 //        map.put("AVG of 3",priceLTP+vol/100);
 // adding the Price +vol/chnginOI
@@ -193,12 +221,12 @@ Double randomDoubleValue=Double.valueOf(randomValue);
             int diffValue = lengthChgOI - lengthPrice;
             if (diffValue > 0) {
                 Double avgValue = (((priceLTP)* LengthUtil.get10Digits(diffValue) / (changeOI)));
-            if (!(avgValue > 1000)){
-                map.put("AVG of 3", avgValue);}
-            else {
-                avgValue=1000+avgValue%1000;
-                map.put("AVG of 3", avgValue / 1000);
-            }
+                if (!(avgValue > 1000)){
+                    map.put("AVG of 3", avgValue);}
+                else {
+                    avgValue=1000+avgValue%1000;
+                    map.put("AVG of 3", avgValue / 1000);
+                }
             }
         }
         catch (Exception e){
@@ -207,9 +235,9 @@ Double randomDoubleValue=Double.valueOf(randomValue);
         }
         map.put("Price and Vol",priceLTP+vol);
         map.put("timestamp",System.currentTimeMillis());
-            String json=new ObjectMapper().writeValueAsString(map);
+        String json=new ObjectMapper().writeValueAsString(map);
 
-            putData(json, indexName);
+        putData(json, indexName);
 // Adding data to bat chart index
 
         putData(json,bnBarCharIndex);
@@ -219,24 +247,24 @@ Double randomDoubleValue=Double.valueOf(randomValue);
 // note To change the value
         Double bnCurrentValue= decimalFormat.parse((String) map.get("underlyingValue")).doubleValue();
 //        Double bnCurrentValue= new NSEBankNiftyFetcher().getBnCurrentValue();
-if(indexName.contains("bn")) {
+        if(indexName.contains("bn")) {
 
-    if (currentStockName.contains("CE") && (currentStockStrikePrice - bnCurrentValue > 0) && (currentStockStrikePrice - bnCurrentValue < 100)) {
-        putData(json, otmIndexName);
-        putDataRatioIndex(listPETemp, changeOI, otmRationINdexName);
-    } else if (currentStockName.contains("PE") && (currentStockStrikePrice - bnCurrentValue > -100) && (currentStockStrikePrice - bnCurrentValue < 0)) {
-        putData(json, otmIndexName);
-        listPETemp.add(changeOI);
-    }
-}else{
-    if (currentStockName.contains("CE") && (currentStockStrikePrice - bnCurrentValue > 0) && (currentStockStrikePrice - bnCurrentValue < 50)) {
-        putData(json, otmIndexName);
-        putDataRatioIndex(listPETemp, changeOI, otmRationINdexName);
-    } else if (currentStockName.contains("PE") && (currentStockStrikePrice - bnCurrentValue > -50) && (currentStockStrikePrice - bnCurrentValue < 0)) {
-        putData(json, otmIndexName);
-        listPETemp.add(changeOI);
-    }
-}
+            if (currentStockName.contains("CE") && (currentStockStrikePrice - bnCurrentValue > 0) && (currentStockStrikePrice - bnCurrentValue < 100)) {
+                putData(json, otmIndexName);
+                putDataRatioIndex(listPETemp, changeOI, otmRationINdexName);
+            } else if (currentStockName.contains("PE") && (currentStockStrikePrice - bnCurrentValue > -100) && (currentStockStrikePrice - bnCurrentValue < 0)) {
+                putData(json, otmIndexName);
+                listPETemp.add(changeOI);
+            }
+        }else{
+            if (currentStockName.contains("CE") && (currentStockStrikePrice - bnCurrentValue > 0) && (currentStockStrikePrice - bnCurrentValue < 50)) {
+                putData(json, otmIndexName);
+                putDataRatioIndex(listPETemp, changeOI, otmRationINdexName);
+            } else if (currentStockName.contains("PE") && (currentStockStrikePrice - bnCurrentValue > -50) && (currentStockStrikePrice - bnCurrentValue < 0)) {
+                putData(json, otmIndexName);
+                listPETemp.add(changeOI);
+            }
+        }
 
     }
 
@@ -364,7 +392,9 @@ if(indexName.contains("bn")) {
                 " \"match_all\": {}\n" +
                 " }\n" +
                 "}";
-        Response response = RestAssured.given().log().all().body(query).contentType(ContentType.JSON).post("http://"+elasticSearchIp+":9200/"+indexName+"/_delete_by_query?conflicts=proceed");
+//        RestAssured.useRelaxedhttpValidation();
+        Response response = RestAssured.given().auth().basic("elastic", elasticPassword).log().all().body(query).contentType(ContentType.JSON).
+                post(elasticHttpHostname+indexName+"/_delete_by_query?conflicts=proceed");
         System.out.println(response.prettyPrint());
 
 
@@ -372,12 +402,25 @@ if(indexName.contains("bn")) {
 
     public void deleteIndex(String indexName) throws IOException, InterruptedException {
         Thread.sleep(2000);
+//        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+//        credentialsProvider.setCredentials(AuthScope.ANY,
+//                new UsernamePasswordCredentials("elastic", elasticPassword));
+//
+//        RestClientBuilder builder = RestClient.builder(new HttpHost(elasticSearchIp, 9200,"http"))
+//                .setHttpClientConfigCallback(new RestClientBuilder.HttpClientConfigCallback() {
+//                    @Override
+//                    public HttpAsyncClientBuilder customizeHttpClient(HttpAsyncClientBuilder httpClientBuilder) {
+//                        return httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+//                    }
+//                });
+//
+//        RestHighLevelClient client = new RestHighLevelClient(builder);
         RestHighLevelClient client = new RestHighLevelClient(RestClient.builder(
                 new HttpHost(elasticSearchIp, 9200, "http"),
                 new HttpHost(elasticSearchIp, 9201, "http")
         ));
 
- //Clear the elastic Search Index first
+        //Clear the elastic Search Index first
         DeleteIndexRequest deleteIndexRequest= new DeleteIndexRequest(indexName);
         client.indices().delete(deleteIndexRequest,RequestOptions.DEFAULT);
         client.close();
@@ -386,6 +429,19 @@ if(indexName.contains("bn")) {
 
     public void addIndex(String indexName) throws IOException, InterruptedException {
         Thread.sleep(2000);
+//        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+//        credentialsProvider.setCredentials(AuthScope.ANY,
+//                new UsernamePasswordCredentials("elastic", elasticPassword));
+//
+//        RestClientBuilder builder = RestClient.builder(new HttpHost(elasticSearchIp, 9200,"http"))
+//                .setHttpClientConfigCallback(new RestClientBuilder.HttpClientConfigCallback() {
+//                    @Override
+//                    public HttpAsyncClientBuilder customizeHttpClient(HttpAsyncClientBuilder httpClientBuilder) {
+//                        return httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+//                    }
+//                });
+//
+//        RestHighLevelClient client = new RestHighLevelClient(builder);
         RestHighLevelClient client = new RestHighLevelClient(RestClient.builder(
                 new HttpHost(elasticSearchIp, 9200, "http"),
                 new HttpHost(elasticSearchIp, 9201, "http")
@@ -413,126 +469,125 @@ if(indexName.contains("bn")) {
     public void addIndex(){
 
         // Adding time stamp
-        Response responseBnNse= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}}")
-        .put("http://"+elasticSearchIp+":9200/incpriincoitop");
+        Response responseBnNse= RestAssured.given().auth().basic("elastic", elasticPassword).contentType("application/json").body("{\"mappings\":{\"_doc\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}}")
+                .put(elasticHttpHostname+"incpriincoitop");
         System.out.println(responseBnNse.prettyPrint());
 
 
 
 
 
-        Response responseIncTop= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-        .put("http://"+elasticSearchIp+":9200/bnnseoidata");
+        Response responseIncTop= RestAssured.given().auth().basic("elastic", elasticPassword).contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+                .put(elasticHttpHostname+"bnnseoidata");
         System.out.println(responseIncTop.prettyPrint());
 
-        Response responseOTM= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://"+elasticSearchIp+":9200/bnotm");
+        Response responseOTM= RestAssured.given().auth().basic("elastic", elasticPassword).contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+                .put(elasticHttpHostname+"bnotm");
         System.out.println(responseOTM.prettyPrint());
 
-        Response responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://"+elasticSearchIp+":9200/bnotmratio");
+        Response responseOTMRatio= RestAssured.given().auth().basic("elastic", elasticPassword).contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+                .put(elasticHttpHostname+"bnotmratio");
         System.out.println(responseOTMRatio.prettyPrint());
 
-        responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://"+elasticSearchIp+":9200/bnotmratioall");
+        responseOTMRatio= RestAssured.given().auth().basic("elastic", elasticPassword).contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+                .put(elasticHttpHostname+"bnotmratioall");
         System.out.println(responseOTMRatio.prettyPrint());
 
-        responseIncTop= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://"+elasticSearchIp+":9200/niftyoidata");
+        responseIncTop= RestAssured.given().auth().basic("elastic", elasticPassword).contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+                .put(elasticHttpHostname+"niftyoidata");
         System.out.println(responseIncTop.prettyPrint());
 
-        responseOTM= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://"+elasticSearchIp+":9200/niftyotm");
+        responseOTM= RestAssured.given().auth().basic("elastic", elasticPassword).contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+                .put(elasticHttpHostname+"niftyotm");
         System.out.println(responseOTM.prettyPrint());
 
-        responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://"+elasticSearchIp+":9200/niftyotmratio");
+        responseOTMRatio= RestAssured.given().auth().basic("elastic", elasticPassword).contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+                .put(elasticHttpHostname+"niftyotmratio");
         System.out.println(responseOTMRatio.prettyPrint());
 
-        responseOTMRatio= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://"+elasticSearchIp+":9200/niftyotmratioall");
+        responseOTMRatio= RestAssured.given().auth().basic("elastic", elasticPassword).contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+                .put(elasticHttpHostname+"niftyotmratioall");
         System.out.println(responseOTMRatio.prettyPrint());
 
-        Response responseBNOIHistory= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://"+elasticSearchIp+":9200/bn_oi_history");
+        Response responseBNOIHistory= RestAssured.given().auth().basic("elastic", elasticPassword).given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+                .put(elasticHttpHostname+"bn_oi_history");
         System.out.println(responseBNOIHistory.prettyPrint());
-        Response incPriIncOiIndex= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://"+elasticSearchIp+":9200/incpriincoitop5");
+        Response incPriIncOiIndex= RestAssured.given().auth().basic("elastic", elasticPassword).contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+                .put(elasticHttpHostname+"incpriincoitop5");
         System.out.println(incPriIncOiIndex.prettyPrint());
 
-        Response niftyBarChartIndex= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://"+elasticSearchIp+":9200/niftybarchart");
+        Response niftyBarChartIndex= RestAssured.given().auth().basic("elastic", elasticPassword).contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+                .put(elasticHttpHostname+"niftybarchart");
         System.out.println(niftyBarChartIndex.prettyPrint());
 
-        Response bnBarChartIndex= RestAssured.given().contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
-                .put("http://"+elasticSearchIp+":9200/bnbarchart");
+        Response bnBarChartIndex= RestAssured.given().auth().basic("elastic", elasticPassword).contentType("application/json").body("{\"mappings\":{\"properties\":{\"timestamp\":{\"type\":\"date\"}}}}")
+                .put(elasticHttpHostname+"bnbarchart");
         System.out.println(bnBarChartIndex.prettyPrint());
 
-        Response niftyPcrIndex= RestAssured.given().contentType("application/json").body("{\n" +
-                "  \"mappings\": {\n" +
-                "    \"properties\": {\n" +
-                "      \"timestamp\": {\n" +
-                "        \"type\": \"date\"\n" +
-                "      },\n" +
-                "      \"publisher\": {\n" +
-                "          \"type\": \"text\",\n" +
-                "          \"fielddata\": true\n" +
-                "        }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}")
-                .put("http://"+elasticSearchIp+":9200/niftypcrindex");
+        Response niftyPcrIndex= RestAssured.given().auth().basic("elastic", elasticPassword).contentType("application/json").body("{\n" +
+                        "  \"mappings\": {\n" +
+                        "    \"properties\": {\n" +
+                        "      \"timestamp\": {\n" +
+                        "        \"type\": \"date\"\n" +
+                        "      },\n" +
+                        "      \"publisher\": {\n" +
+                        "          \"type\": \"text\",\n" +
+                        "          \"fielddata\": true\n" +
+                        "        }\n" +
+                        "    }\n" +
+                        "  }\n" +
+                        "}")
+                .put(elasticHttpHostname+"niftypcrindex");
         System.out.println(niftyPcrIndex.prettyPrint());
 
-        Response bnPcrIndex= RestAssured.given().contentType("application/json").body("{\n" +
-                "  \"mappings\": {\n" +
-                "    \"properties\": {\n" +
-                "      \"timestamp\": {\n" +
-                "        \"type\": \"date\"\n" +
-                "      },\n" +
-                "      \"publisher\": {\n" +
-                "          \"type\": \"text\",\n" +
-                "          \"fielddata\": true\n" +
-                "        }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}")
-                .put("http://"+elasticSearchIp+":9200/bnpcrindex");
+        Response bnPcrIndex= RestAssured.given().auth().basic("elastic", elasticPassword).contentType("application/json").body("{\n" +
+                        "  \"mappings\": {\n" +
+                        "    \"properties\": {\n" +
+                        "      \"timestamp\": {\n" +
+                        "        \"type\": \"date\"\n" +
+                        "      },\n" +
+                        "      \"publisher\": {\n" +
+                        "          \"type\": \"text\",\n" +
+                        "          \"fielddata\": true\n" +
+                        "        }\n" +
+                        "    }\n" +
+                        "  }\n" +
+                        "}")
+                .put(elasticHttpHostname+"bnpcrindex");
         System.out.println(bnPcrIndex.prettyPrint());
     }
 
     public static void main(String[] args) throws IOException {
+
         String []index_list = {"bnnseoidata","bnotm","bnotmratio","bnotmratioall","niftyoidata","niftyotm","niftyotmratio"
-        ,"niftyotmratioall","incpriincoitop5","bn_oi_history","niftypcrindex","bnpcrindex","niftybarchart","bnbarchart"};
+                ,"niftyotmratioall","incpriincoitop5","bn_oi_history","niftypcrindex","bnpcrindex","niftybarchart","bnbarchart"};
 //        new ElasticSearchUtil().deleteIndex("incpriincoitop");
 //        Response response = new ElasticSearchUtil().importSavedObject("src/main/resources/elasticSearchBackup/export.ndjson");
 //        System.out.println("Import data Response : "+response.getStatusLine());
 //        System.out.println("Import data Response : "+response.getStatusCode());
 //        System.out.println("API Respoonse : "+response.prettyPrint());
         ElasticSearchUtil elasticSearchUtil = new ElasticSearchUtil();
-    try {
+        try {
 
-        for (int i = 0; i <index_list.length ; i++) {
-            System.out.println("Clearing data for index : "+index_list[i]);
-            elasticSearchUtil.clearIndexData(index_list[i]);
-        }
-
+            for (int i = 0; i <index_list.length ; i++) {
+                System.out.println("Clearing data for index : "+index_list[i]);
+                elasticSearchUtil.clearIndexData(index_list[i]);
+            }
+//
 //        Deleting index
-//        for (int i = 0; i <index_list.length ; i++) {
-//            System.out.println("Deleting index : "+index_list[i]);
-//            Thread.sleep(1000);
-//            elasticSearchUtil.deleteIndex(index_list[i]);
-//        }
-//        elasticSearchUtil.addIndex();
-//8
+            for (int i = 0; i <index_list.length ; i++) {
+                System.out.println("Deleting index : "+index_list[i]);
+                Thread.sleep(1000);
+                elasticSearchUtil.deleteIndex(index_list[i]);
+            }
+            elasticSearchUtil.addIndex();
 
-
-    }
-    catch (Exception e){
-        System.out.println("Exception catched!!!");
-        System.out.println("Index not found in elasticsearch");
-        elasticSearchUtil.addIndex();
-    }
+        }
+        catch (Exception e){
+            System.out.println("Exception catched!!!");
+            System.out.println("Index not found in elasticsearch");
+            elasticSearchUtil.addIndex();
+        }
 
 
 

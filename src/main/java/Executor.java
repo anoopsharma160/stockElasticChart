@@ -8,28 +8,28 @@ public class Executor {
     public static void main(String[] args) throws InterruptedException, ParseException, IOException {
         for (int i = 0; i <5000 ; i++) {
 
-               System.out.println("Thread waiting for 70 seconds");
-               Thread.sleep(70000);
-//                Thread.sleep(900);
-               NSEBNDController object=new NSEBNDController();
-               // Call for BN
-               try {
-                   object.execute(0);
-               }
+            System.out.println("Thread waiting for 70 seconds");
+//               Thread.sleep(70000);
+            Thread.sleep(900);
+            NSEBNDController object=new NSEBNDController();
+            // Call for BN
+            try {
+                object.execute(0);
+            }
 
-           catch (Exception e){
-              System.out.println("Exception catched");
-               e.printStackTrace();
-           }
-               try{
-               // Call for NiftyR
-               object.executeNifty(0);
-               System.out.println("Count : " + i);
-           }
-           catch (Exception e){
-               System.out.println("Exception catched");
-               e.printStackTrace();
-           }
+            catch (Exception e){
+                System.out.println("Exception catched");
+                e.printStackTrace();
+            }
+            try{
+                // Call for NiftyR
+                object.executeNifty(0);
+                System.out.println("Count : " + i);
+            }
+            catch (Exception e){
+                System.out.println("Exception catched");
+                e.printStackTrace();
+            }
 //// Generating the alert
 //            try {
 //                Thread.sleep(1000);
