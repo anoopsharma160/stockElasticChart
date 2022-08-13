@@ -575,12 +575,12 @@ public class ElasticSearchUtil {
             }
 //
 //        Deleting index
-            for (int i = 0; i <index_list.length ; i++) {
-                System.out.println("Deleting index : "+index_list[i]);
-                Thread.sleep(1000);
-                elasticSearchUtil.deleteIndex(index_list[i]);
-            }
-            elasticSearchUtil.addIndex();
+//            for (int i = 0; i <index_list.length ; i++) {
+//                System.out.println("Deleting index : "+index_list[i]);
+//                Thread.sleep(1000);
+//                elasticSearchUtil.deleteIndex(index_list[i]);
+//            }
+//            elasticSearchUtil.addIndex();
 
         }
         catch (Exception e){
