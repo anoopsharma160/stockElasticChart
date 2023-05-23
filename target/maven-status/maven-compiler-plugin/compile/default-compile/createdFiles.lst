@@ -7,8 +7,6 @@ NSEData/NseChartController.class
 IndexDataGathering/MoneyControllerIndexFetcher.class
 IndexNSELive/ChartControllerIndex.class
 MoneyControlDataFetcher/MoneyControllerScrapper.class
-TestChrome.class
-StockMongo/StockMongo/StockMongoApplication.class
 MoneyControlDataFetcher/ESInsertionIncPri.class
 DailyOIHistory/NSEHistoryScrapper.class
 ElasticSearch/TelegramTest.class
@@ -22,4 +20,3 @@ Controller/IncreaseOIController.class
 util/FileUtil.class
 MoneyControlDataFetcher/ChartController.class
 ElasticSearch/ElasticSearchUtil.class
-TestJsoup.class
