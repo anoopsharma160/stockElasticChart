@@ -9,12 +9,12 @@ public class Executor {
         for (int i = 0; i <5000 ; i++) {
 
             System.out.println("Thread waiting for 70 seconds");
-               Thread.sleep(70000);
-//            Thread.sleep(900);
+//               Thread.sleep(70000);
+            Thread.sleep(9000);
             NSEBNDController object=new NSEBNDController();
             // Call for BN
             try {
-                object.execute(0);
+//                object.execute(0);
             }
 
             catch (Exception e){

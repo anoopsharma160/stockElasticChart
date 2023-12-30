@@ -19,7 +19,7 @@ public class Utils {
                 calendar.add(Calendar.DAY_OF_WEEK, 7);
             }
             calendar.set(Calendar.DAY_OF_WEEK, Calendar.THURSDAY);
-//            calendar.add(Calendar.DAY_OF_WEEK,-1);
+//            calendar.add(Calendar.DAY_OF_WEEK,-1);    
         }
         else{
 //            calendar.set(Calendar.DAY_OF_WEEK,Calendar.THURSDAY);

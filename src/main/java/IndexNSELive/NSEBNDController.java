@@ -16,8 +16,7 @@ import util.ParseJSON;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class NSEBNDController {
 
@@ -50,9 +49,10 @@ public class NSEBNDController {
         try {
             for (int i = 0; i < 20; i++) {
                 System.out.println("Trying api call: " + i);
-                Thread.sleep(2000);
+//                Thread.sleep(1000);
                 try {
-                    map = ParseJSON.getMap("https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY");
+                    map = ParseJSON.getMap("https://nseindia.com/api/option-chain-indices?symbol=BANKNIFTY");
+//                    map = ParseJSON.getMap("https://google.com");
                     break;
                 } catch (Exception e) {
                     System.out.println("API Call failed!! " + e.toString());
@@ -118,7 +118,7 @@ public class NSEBNDController {
         }
     public void executeNifty(int sleepTime) throws Exception {
 //Thread.sleep(sleepTime*1000);
-        Map<String,Map<String,String>> map = null;
+        Map<String, Map<String, String>> map = null;
 //        Map<String, Map<String, String>> map = new NSEBankNiftyFetcher().getMappedData("https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=-10003&symbol=NIFTY&symbol=NIFTY&instrument=OPTIDX&date=-&segmentLink=17&segmentLink=17");
         try {
             for (int i = 0; i < 20; i++) {
@@ -132,14 +132,13 @@ public class NSEBNDController {
 
                 }
             }
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             System.out.println("After all api call!! throwing exceptions manually");
-            throw  new Exception("Manually throw exceptions!!!!");
+            throw new Exception("Manually throw exceptions!!!!");
         }
-        
+
 //        Double bnCurrentValue=new NSEBankNiftyFetcher().getBnCurrentValue();
-        Double bnCurrentValue=new DecimalFormat().parse(ParseJSON.getBnCurrentValue()).doubleValue();
+        Double bnCurrentValue = new DecimalFormat().parse(ParseJSON.getBnCurrentValue()).doubleValue();
         double oiCE = 0;
         double oiPE = 0;
         double chgOiCE = 0;
@@ -147,62 +146,89 @@ public class NSEBNDController {
         double volCE = 0;
         double volPE = 0;
 
-        double oiPcr=0;
-        double chgOiPcr=0;
-        double volPcr=0;
+        double oiPcr = 0;
+        double chgOiPcr = 0;
+        double volPcr = 0;
 
-        DecimalFormat decimalFormat= new DecimalFormat();
+        DecimalFormat decimalFormat = new DecimalFormat();
         new ElasticSearchUtil().clearIndexData("niftybarchart");
-        for (String key : map.keySet()) {
-            if(!key.contains("null")) {
-                Map<String, String> internalMap = map.get(key);
-                System.out.println(internalMap.get("strikePrice"));
+
+        Set pcrSet = null;
+        int loopCount =0;
+
+            pcrSet = new HashSet();
+            for (String key : map.keySet()) {
+//                Thread.sleep(100);
+//                System.out.println("Loop Count : " + String.valueOf(loopCount++));
+
+                if (!key.contains("null")) {
+                    Map<String, String> internalMap = map.get(key);
+                    System.out.println(internalMap.get("strikePrice"));
 //                    decimalFormat.parse((String) map.get("LTP")).doubleValue();
 
-                Double strikePriceValue = new DecimalFormat().parse(internalMap.get("strikePrice")).doubleValue();
-                // Logic to control range of data
-                if ((bnCurrentValue - strikePriceValue > -800) && (bnCurrentValue - strikePriceValue < 800)) {
+                    Double strikePriceValue = new DecimalFormat().parse(internalMap.get("strikePrice")).doubleValue();
+                    // Logic to control range of data
+
+                    if ((bnCurrentValue - strikePriceValue > -200) && (bnCurrentValue - strikePriceValue < 200)) {
 //                    Double bnCurrentVal=new NSEBankNiftyFetcher().getBnCurrentValue();
 //                    if((strikePriceValue-bnCurrentValue>=-1900)&&(strikePriceValue-bnCurrentValue<=1900))
-                    new ElasticSearchUtil().storeDataESNifty(key, internalMap, "niftyoidata", "niftyotm", "niftyotmratio","niftybarchart");
+                        pcrSet.add(strikePriceValue);
+                        new ElasticSearchUtil().storeDataESNifty(key, internalMap, "niftyoidata", "niftyotm", "niftyotmratio", "niftybarchart");
 
-                    Map valueMap = map.get(key);
+                        Map valueMap = map.get(key);
 
-                    // Logic for PCR
-                    if (key.contains("CE")) {
-                        oiCE += (double) valueMap.getOrDefault("OI", 0.0);
-                        chgOiCE += (double) valueMap.getOrDefault("Chng in OI", 0.0);
-                        volCE += (double) valueMap.getOrDefault("Volume", 0.0);
-                    } else {
-                        oiPE += (double) valueMap.getOrDefault("OI", 0.0);
-                        chgOiPE += (double) valueMap.getOrDefault("Chng in OI", 0.0);
-                        volPE += (double) valueMap.getOrDefault("Volume", 0.0);
+                        // Logic for PCR
+//                    if (key.contains("CE")) {
+//                        oiCE += (double) valueMap.getOrDefault("OI", 0.0);
+//                        chgOiCE += (double) valueMap.getOrDefault("Chng in OI", 0.0);
+//                        volCE += (double) valueMap.getOrDefault("Volume", 0.0);
+//                    } else {
+//                        oiPE += (double) valueMap.getOrDefault("OI", 0.0);
+//                        chgOiPE += (double) valueMap.getOrDefault("Chng in OI", 0.0);
+//                        volPE += (double) valueMap.getOrDefault("Volume", 0.0);
+//                    }
+
                     }
-
                 }
+
+            }
+        Random random = new Random();
+            for(Object strikePriceValue : pcrSet){
+                System.out.println(map.get(String.valueOf(strikePriceValue).replace(".0","")+" CE"));
+                System.out.println(map.get(String.valueOf(strikePriceValue).replace(".0","")+" CE").get("changeinOpenInterest"));
+                Integer  chgOICE= Integer.valueOf(map.get(String.valueOf(strikePriceValue).replace(".0","")+" CE".replace(".0","")).get("changeinOpenInterest"));
+                Integer  chgOIPE= Integer.valueOf(map.get(String.valueOf(strikePriceValue).replace(".0","")+" PE".replace(".0","")).get("changeinOpenInterest"));
+
+                Integer  OICE= Integer.valueOf(map.get(String.valueOf(strikePriceValue).replace(".0","")+" CE").get("openInterest"));
+                Integer  OIPE= Integer.valueOf(map.get(String.valueOf(strikePriceValue).replace(".0",""+" PE")).get("openInterest"));
+
+                Map pcrMap = new HashMap();
+                pcrMap.put("Nifty Current", bnCurrentValue);
+                pcrMap.put("CHG OI PCR", (chgOIPE/chgOICE)+random.nextInt());
+                pcrMap.put("OI PCR", (OIPE/OICE));
+//            pcrMap.put("Vol PCR", volPcr);
+                pcrMap.put("StrikePrice", strikePriceValue);
+                pcrMap.put("timestamp", System.currentTimeMillis());
+
+                new ElasticSearchUtil().putData(new ObjectMapper().writeValueAsString(pcrMap), "niftypcrindex");
+
             }
 
-        }
-        oiPcr=oiPE/oiCE;
-        chgOiPcr=chgOiPE/chgOiCE;
-        volPcr=volPE/volCE;
+//        Iterate over set to calculate PCR values
+
+            oiPcr = oiPE / oiCE;
+        chgOiPcr = chgOiPE / chgOiCE;
+        volPcr = volPE / volCE;
 
         if (Double.isNaN(oiPcr))
-            oiPcr =0.0;
+            oiPcr = 0.0;
         if (Double.isNaN(chgOiPcr))
             chgOiPcr = 0.0;
-        if(Double.isNaN(volPcr))
-            volPcr =0.0;
+        if (Double.isNaN(volPcr))
+            volPcr = 0.0;
 
         //Construct map
-        Map pcrMap= new HashMap();
-        pcrMap.put("Nifty Current",bnCurrentValue);
-        pcrMap.put("OI PCR",oiPcr);
-        pcrMap.put("CHG OI PCR",chgOiPcr);
-        pcrMap.put("Vol PCR",volPcr);
-        pcrMap.put("timestamp",System.currentTimeMillis());
 
-        new ElasticSearchUtil().putData(new ObjectMapper().writeValueAsString(pcrMap),"niftypcrindex");
 
 
     }
