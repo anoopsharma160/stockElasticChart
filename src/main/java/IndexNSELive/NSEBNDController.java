@@ -192,7 +192,7 @@ public class NSEBNDController {
                 }
 
             }
-        Random random = new Random();
+//        Random random = new Random();
             for(Object strikePriceValue : pcrSet){
                 System.out.println(map.get(String.valueOf(strikePriceValue).replace(".0","")+" CE"));
                 System.out.println(map.get(String.valueOf(strikePriceValue).replace(".0","")+" CE").get("changeinOpenInterest"));
@@ -204,7 +204,7 @@ public class NSEBNDController {
 
                 Map pcrMap = new HashMap();
                 pcrMap.put("Nifty Current", bnCurrentValue);
-                pcrMap.put("CHG OI PCR", (chgOIPE/chgOICE)+random.nextInt());
+                pcrMap.put("CHG OI PCR", (chgOIPE/chgOICE));
                 pcrMap.put("OI PCR", (OIPE/OICE));
 //            pcrMap.put("Vol PCR", volPcr);
                 pcrMap.put("StrikePrice", strikePriceValue);
