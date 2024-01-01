@@ -202,10 +202,13 @@ public class NSEBNDController {
                 Integer  OICE= Integer.valueOf(map.get(String.valueOf(strikePriceValue).replace(".0","")+" CE").get("openInterest"));
                 Integer  OIPE= Integer.valueOf(map.get(String.valueOf(strikePriceValue).replace(".0",""+" PE")).get("openInterest"));
 
+                Double chgOIPCR = (double)chgOIPE/chgOICE;
+                Double OIPCR = (double)OIPE/OICE;
+
                 Map pcrMap = new HashMap();
                 pcrMap.put("Nifty Current", bnCurrentValue);
-                pcrMap.put("CHG OI PCR", (chgOIPE/chgOICE));
-                pcrMap.put("OI PCR", (OIPE/OICE));
+                pcrMap.put("CHG OI PCR", chgOIPCR);
+                pcrMap.put("OI PCR", OIPCR);
 //            pcrMap.put("Vol PCR", volPcr);
                 pcrMap.put("StrikePrice", strikePriceValue);
                 pcrMap.put("timestamp", System.currentTimeMillis());
