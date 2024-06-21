@@ -581,7 +581,7 @@ public class ElasticSearchUtil {
 //                elasticSearchUtil.deleteIndex(index_list[i]);
 //            }
 //            elasticSearchUtil.addIndex();
-
+//
         }
         catch (Exception e){
             System.out.println("Exception catched!!!");
